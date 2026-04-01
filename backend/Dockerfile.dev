@@ -1,0 +1,26 @@
+# ── Backend Development Dockerfile ──────────────────────────────────────────────
+# Runs NestJS in watch mode with ts-node via `nest start --watch`.
+# Source code is mounted from the host via docker-compose volume.
+
+FROM node:22-alpine
+
+WORKDIR /app
+
+# Install dependencies first (cached layer)
+COPY package*.json ./
+RUN npm ci
+
+# Copy Prisma schema so the generate step works at startup
+COPY prisma ./prisma
+COPY prisma.config.ts ./
+
+# Generate Prisma client inside the container
+RUN npx prisma generate
+
+# Source is mounted at runtime — no COPY src here
+COPY tsconfig*.json nest-cli.json ./
+
+EXPOSE 3000
+
+# Run migrations, seed (idempotent), then start the dev server
+CMD ["sh", "-c", "npx prisma migrate deploy && npx ts-node src/seed.ts && npm run start:dev"]
