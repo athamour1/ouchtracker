@@ -1,0 +1,81 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# FAK-CRM — Development Docker Compose
+#
+# Services:
+#   db       — PostgreSQL 16 (persisted via named volume)
+#   backend  — NestJS in watch mode (hot-reload via ts-node + chokidar)
+#   frontend — Quasar Dev Server with HMR
+#
+# Usage:
+#   docker compose -f docker-compose.dev.yml up --build
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: fakcrm-dev
+
+services:
+
+  # ── PostgreSQL 16 ────────────────────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: fakcrm-db-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: fakcrm
+      POSTGRES_PASSWORD: fakcrm_dev_pass
+      POSTGRES_DB: fakcrm_db
+    ports:
+      - "5432:5432"     # expose to host so you can run prisma migrate from the CLI
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fakcrm -d fakcrm_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── NestJS Backend (watch mode) ───────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: fakcrm-backend-dev
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://fakcrm:fakcrm_dev_pass@db:5432/fakcrm_db?schema=public
+      CORS_ORIGIN: http://localhost:9000
+      JWT_SECRET: dev_jwt_secret_change_in_prod
+      JWT_EXPIRES_IN: 8h
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-admin@fakcrm.local}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-Admin1234!}
+      SEED_ADMIN_NAME: ${SEED_ADMIN_NAME:-System Admin}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend/src:/app/src              # live-reload source
+      - ./backend/prisma:/app/prisma        # schema & migrations
+      - /app/node_modules                   # keep container's node_modules
+
+  # ── Quasar Frontend (HMR) ────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: fakcrm-frontend-dev
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      VITE_API_URL: http://localhost:3000/api
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./frontend/src:/app/src             # live-reload source
+      - ./frontend/public:/app/public
+      - /app/node_modules                   # keep container's node_modules
+
+volumes:
+  postgres_dev_data:

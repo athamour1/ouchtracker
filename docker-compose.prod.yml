@@ -1,0 +1,89 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# FAK-CRM — Production Docker Compose
+#
+# Services:
+#   db       — PostgreSQL 16 (persisted via named volume, no host port exposed)
+#   backend  — NestJS compiled, runs migrations on startup
+#   frontend — Quasar SPA served by nginx, proxies /api → backend
+#
+# Before first run:
+#   1. Copy .env.prod.example → .env.prod and fill in secrets
+#   2. docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+#
+# The --env-file flag is required so Compose can interpolate ${VAR} placeholders.
+# The env_file key on each service injects those same vars into the containers.
+#
+# The only public-facing port is 80 (frontend + API proxy).
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: fakcrm-prod
+
+services:
+
+  # ── PostgreSQL 16 ─────────────────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: fakcrm-db
+    restart: always
+    env_file:
+      - .env.prod
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # db port is NOT exposed to the host in production
+
+  # ── NestJS Backend ────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: fakcrm-backend
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env.prod
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}?schema=public
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-admin@fakcrm.local}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD}
+      SEED_ADMIN_NAME: ${SEED_ADMIN_NAME:-System Admin}
+    # backend port is NOT exposed to the host — nginx proxies through Docker network
+    expose:
+      - "3000"
+
+  # ── Nginx + Quasar SPA ────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: fakcrm-frontend
+    restart: always
+    depends_on:
+      - backend
+    env_file:
+      - .env.prod
+    environment:
+      # Runtime — written into /config.js by docker-entrypoint.sh each time
+      # the container starts. Change without rebuilding the image.
+      # Use /api (relative) when nginx proxies on the same domain, or set a
+      # full URL like https://api.your-domain.com/api for split deployments.
+      API_URL: ${API_URL:-/api}
+    ports:
+      - "80:80"
+
+volumes:
+  postgres_prod_data:
