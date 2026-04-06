@@ -27,6 +27,7 @@
       :breakpoint="700"
       bordered
       :class="[$q.dark.isActive ? 'bg-grey-10' : 'bg-grey-1', 'column']"
+      style="overflow: hidden;"
     >
       <!-- Branding strip -->
       <!-- <div class="drawer-brand bg-primary text-white q-pa-md row items-center q-gutter-sm">
@@ -38,7 +39,7 @@
       </div> -->
 
       <!-- Nav links — scrollable -->
-      <q-scroll-area class="col" style="width: 100%;">
+      <q-scroll-area class="col" style="width: 100%; min-height: 0;">
         <q-list padding>
 
           <q-item-label header class="text-grey-7 text-caption text-uppercase">
