@@ -28,8 +28,8 @@
 
     <!-- ── Progress & summary bar ─────────────────────────────────────────────── -->
     <q-card flat bordered :class="['q-mb-md', $q.dark.isActive ? 'bg-blue-10' : 'bg-blue-1']" v-if="kit && !loading">
-      <q-card-section class="q-py-sm row items-center q-gutter-md">
-        <div class="text-caption text-blue-9">
+      <q-card-section class="q-py-md row items-center q-gutter-md">
+        <div class="text-caption" :class="$q.dark.isActive ? 'text-blue-2' : 'text-blue-9'">
           <strong>{{ checkedCount }}</strong> / {{ items.length }} items reviewed
         </div>
         <q-linear-progress
@@ -37,7 +37,7 @@
           color="primary" class="col"
           style="height: 8px; border-radius: 4px;"
         />
-        <div class="text-caption text-blue-9">
+        <div class="text-caption" :class="$q.dark.isActive ? 'text-blue-2' : 'text-blue-9'">
           {{ Math.round(items.length ? (checkedCount / items.length) * 100 : 0) }}%
         </div>
       </q-card-section>
