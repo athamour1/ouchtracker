@@ -23,4 +23,4 @@ COPY tsconfig*.json nest-cli.json ./
 EXPOSE 3000
 
 # Run migrations, seed (idempotent), then start the dev server
-CMD ["sh", "-c", "npx prisma migrate deploy && npx ts-node src/seed.ts && npm run start:dev"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npx ts-node prisma/seed.ts && npm run start:dev"]

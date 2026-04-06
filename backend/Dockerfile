@@ -31,9 +31,9 @@ FROM node:22-alpine AS runner
 
 WORKDIR /app
 
-# Only production dependencies
+# Production dependencies + ts-node for seed script
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN npm ci --omit=dev && npm install --no-save ts-node
 
 # Prisma schema + config needed for `prisma migrate deploy` at startup
 COPY prisma ./prisma
@@ -52,4 +52,4 @@ USER appuser
 EXPOSE 3000
 
 # Run migrations, seed (idempotent), then start the compiled server
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/seed && node dist/main"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npx ts-node prisma/seed.prod.ts && node dist/main"]

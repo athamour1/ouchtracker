@@ -11,12 +11,13 @@ RUN npm install -g @quasar/cli
 
 # Install project dependencies (cached layer)
 COPY package*.json ./
-RUN npm ci
+RUN npm install --ignore-scripts
 
 # Config files — source mounted at runtime
 COPY quasar.config.* ./
 COPY tsconfig*.json ./
 COPY index.html ./
+COPY eslint.config.js ./
 
 EXPOSE 9000
 
