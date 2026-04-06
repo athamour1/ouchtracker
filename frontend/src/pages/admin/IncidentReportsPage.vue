@@ -39,12 +39,12 @@
           </q-tr>
 
           <q-tr v-show="props.expand" :props="props" :class="$q.dark.isActive ? 'bg-red-10' : 'bg-red-1'">
-            <q-td colspan="100%">
-              <div class="q-pa-sm">
+            <q-td colspan="100%" style="padding: 0;">
+              <div class="q-pa-sm" style="overflow-x: auto;">
                 <div v-if="props.row.description" class="q-mb-sm text-caption text-grey-8">
                   <strong>Description:</strong> {{ props.row.description }}
                 </div>
-                <q-markup-table dense flat bordered separator="cell">
+                <q-markup-table dense flat bordered separator="cell" style="min-width: 360px;">
                   <thead>
                     <tr :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-2'">
                       <th class="text-left">Item</th>

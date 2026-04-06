@@ -60,12 +60,12 @@
 
           <!-- Expanded items sub-table -->
           <q-tr v-show="props.expand" :props="props" :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-1'">
-            <q-td colspan="100%">
-              <div class="q-pa-sm">
+            <q-td colspan="100%" style="padding: 0;">
+              <div class="q-pa-sm" style="overflow-x: auto;">
                 <div class="text-subtitle2 q-mb-sm text-grey-7">
                   Items inspected — {{ props.row.items.length }} item(s)
                 </div>
-                <q-markup-table dense flat bordered separator="cell">
+                <q-markup-table dense flat bordered separator="cell" style="min-width: 480px;">
                   <thead>
                     <tr :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-2'">
                       <th class="text-left">Item</th>
