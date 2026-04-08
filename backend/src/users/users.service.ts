@@ -12,7 +12,7 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 
 const SELECT_SAFE = {
   id: true, email: true, fullName: true, role: true,
-  isActive: true, createdAt: true, updatedAt: true,
+  isActive: true, locale: true, createdAt: true, updatedAt: true,
 };
 
 @Injectable()
@@ -77,6 +77,7 @@ export class UsersService {
     const data: Record<string, unknown> = {};
     if (dto.fullName !== undefined) data['fullName'] = dto.fullName;
     if (dto.email !== undefined) data['email'] = dto.email;
+    if (dto.locale !== undefined) data['locale'] = dto.locale;
     if (dto.newPassword) data['password'] = await bcrypt.hash(dto.newPassword, 12);
 
     return this.prisma.user.update({ where: { id }, data, select: SELECT_SAFE });

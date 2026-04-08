@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
     <div class="text-h5 q-mb-lg">
-      <q-icon name="inventory" class="q-mr-sm" />My Kits
+      <q-icon name="inventory" class="q-mr-sm" />{{ $t('nav.myKits') }}
     </div>
 
     <!-- Loading skeletons -->
@@ -20,7 +20,7 @@
     <!-- Empty state -->
     <div v-else-if="!kits.length" class="column items-center q-py-xl text-grey-5">
       <q-icon name="inventory_2" size="64px" class="q-mb-md" />
-      <div class="text-h6">No kits assigned yet</div>
+      <div class="text-h6">{{ $t('kits.noKits') }}</div>
       <div class="text-caption">Contact your admin to get a kit assigned to you.</div>
     </div>
 
@@ -39,7 +39,7 @@
                 <div class="text-subtitle1 text-weight-bold ellipsis">{{ kit.name }}</div>
                 <div class="text-caption text-grey-6 row items-center">
                   <q-icon name="location_on" size="14px" class="q-mr-xs" />
-                  {{ kit.location || 'No location set' }}
+                  {{ kit.location || $t('kits.noLocation') }}
                 </div>
               </div>
               <!-- Alert badge -->
@@ -72,7 +72,7 @@
               </q-chip>
               <q-chip v-if="expiredCount(kit) > 0" dense icon="dangerous"
                 color="negative" text-color="white" size="sm">
-                {{ expiredCount(kit) }} expired
+                {{ expiredCount(kit) }} {{ $t('dashboard.expired') }}
               </q-chip>
               <q-chip v-if="expiringSoonCount(kit) > 0" dense icon="warning"
                 color="orange" text-color="white" size="sm">
@@ -143,9 +143,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { kitsApi, type Kit } from 'src/services/api';
 import { useNotify } from 'src/composables/useNotify';
 
+const { t: _t } = useI18n();
 const router = useRouter();
 const notify = useNotify();
 const kits = ref<Kit[]>([]);

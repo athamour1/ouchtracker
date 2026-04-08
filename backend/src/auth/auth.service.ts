@@ -20,6 +20,7 @@ export class AuthService {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return null;
 
+    // Strip sensitive fields; keep locale so frontend can set language immediately
     const { password: _pw, refreshTokenHash: _rt, ...result } = user;
     return result;
   }
@@ -78,5 +79,18 @@ export class AuthService {
       where: { id: userId },
       data: { refreshTokenHash: null },
     });
+  }
+
+  async getProfile(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true, email: true, fullName: true,
+        role: true, isActive: true, locale: true,
+        createdAt: true, updatedAt: true,
+      },
+    });
+    if (!user) throw new Error('User not found');
+    return user;
   }
 }

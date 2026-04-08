@@ -14,7 +14,7 @@
           :icon="$q.dark.isActive ? 'light_mode' : 'dark_mode'"
           @click="toggleDark"
         >
-          <q-tooltip>{{ $q.dark.isActive ? 'Light mode' : 'Dark mode' }}</q-tooltip>
+          <q-tooltip>{{ $q.dark.isActive ? $t('theme.lightMode') : $t('theme.darkMode') }}</q-tooltip>
         </q-btn>
 
         <!-- PWA install button — only shown when installable -->
@@ -24,7 +24,7 @@
           icon="install_mobile"
           @click="handleInstall"
         >
-          <q-tooltip>Install App</q-tooltip>
+          <q-tooltip>{{ $t('pwa.installApp') }}</q-tooltip>
         </q-btn>
       </q-toolbar>
 
@@ -32,8 +32,8 @@
       <transition name="slide-down">
         <div v-if="isInstallable && showBanner" class="install-banner row items-center q-px-md q-py-sm">
           <q-icon name="install_mobile" size="20px" class="q-mr-sm" />
-          <div class="col text-body2">Install OuchTracker for quick offline access</div>
-          <q-btn no-caps rounded flat dense label="Install" color="white" class="q-mr-xs" @click="handleInstall" />
+          <div class="col text-body2">{{ $t('pwa.installPrompt') }}</div>
+          <q-btn no-caps rounded flat dense :label="$t('pwa.install')" color="white" class="q-mr-xs" @click="handleInstall" />
           <q-btn no-caps rounded flat dense round icon="close" color="white" @click="dismissBanner" />
         </div>
       </transition>
@@ -63,31 +63,31 @@
         <q-list padding>
 
           <q-item-label header class="text-grey-7 text-caption text-uppercase">
-            General
+            {{ $t('nav.general') }}
           </q-item-label>
-          <NavItem icon="dashboard" label="Dashboard" to="/dashboard" />
+          <NavItem icon="dashboard" :label="$t('nav.dashboard')" to="/dashboard" />
 
           <!-- Admin links -->
           <template v-if="authStore.isAdmin">
             <q-separator class="q-my-sm" />
             <q-item-label header class="text-grey-7 text-caption text-uppercase">
-              Administration
+              {{ $t('nav.administration') }}
             </q-item-label>
-            <NavItem icon="people"           label="Users"        to="/admin/users" />
-            <NavItem icon="medical_services" label="Kits"         to="/admin/kits" />
-            <NavItem icon="fact_check"       label="Inspections"  to="/admin/inspections" />
-            <NavItem icon="warning"          label="Incidents"    to="/admin/incidents" />
+            <NavItem icon="people"           :label="$t('nav.users')"       to="/admin/users" />
+            <NavItem icon="medical_services" :label="$t('nav.kits')"        to="/admin/kits" />
+            <NavItem icon="fact_check"       :label="$t('nav.inspections')" to="/admin/inspections" />
+            <NavItem icon="warning"          :label="$t('nav.incidents')"   to="/admin/incidents" />
           </template>
 
           <!-- Checker links -->
           <template v-if="authStore.isChecker">
             <q-separator class="q-my-sm" />
             <q-item-label header class="text-grey-7 text-caption text-uppercase">
-              My Work
+              {{ $t('nav.myWork') }}
             </q-item-label>
-            <NavItem icon="inventory"  label="My Kits"        to="/my-kits" />
-            <NavItem icon="fact_check" label="My Inspections" to="/my-inspections" />
-            <NavItem icon="warning"    label="My Incidents"   to="/my-incidents" />
+            <NavItem icon="inventory"  :label="$t('nav.myKits')"         to="/my-kits" />
+            <NavItem icon="fact_check" :label="$t('nav.myInspections')"  to="/my-inspections" />
+            <NavItem icon="warning"    :label="$t('nav.myIncidents')"    to="/my-incidents" />
           </template>
 
         </q-list>
@@ -95,7 +95,7 @@
 
       <!-- ── User + Logout — pinned to bottom ──────────────────────────────── -->
       <div :class="['drawer-footer q-pa-md', $q.dark.isActive ? 'bg-grey-9' : 'bg-grey-2']">
-        <NavItem icon="manage_accounts" label="Profile Settings" to="/profile" class="q-mx-none" />
+        <NavItem icon="manage_accounts" :label="$t('nav.profileSettings')" to="/profile" class="q-mx-none" />
         <q-separator class="q-mb-sm" />
         <div class="row items-center q-mb-sm q-gutter-sm">
           <q-avatar color="primary" text-color="white" size="36px">
@@ -115,7 +115,7 @@
           </div>
         </div>
         <q-btn no-caps rounded
-          unelevated color="primary" icon="logout" label="Sign Out"
+          unelevated color="primary" icon="logout" :label="$t('nav.signOut')"
           class="full-width" size="sm"
           @click="handleLogout"
         />
@@ -135,10 +135,12 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import { useAuthStore } from 'stores/auth.store';
 import { usePwaInstall } from 'src/composables/usePwaInstall';
 import NavItem from 'components/NavItem.vue';
 
+const { t: _t } = useI18n();
 const $q = useQuasar();
 const authStore = useAuthStore();
 const router = useRouter();

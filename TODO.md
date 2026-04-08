@@ -1,6 +1,10 @@
 # TODO List
 
-- [ ] Add contact points for notifications
+- [ ] Add contact points for notifications(new reports, new incidents, and items near experiation or passed experietion)
+  - [ ] Telegram
+  - [ ] Viber
+  - [ ] Discord
+  - [ ] email smtp
 - [X] Add export to pdf
 - [X] Create readme md file
 - [X] create a page for this project a webpage (add a folder for info site), and deploy it through the github actions to pages
@@ -14,5 +18,13 @@
 - [X] Change primary color to Red
 - [X] Add profile settings so the user can change his password or email
 - [X] Make this app a pwa
+- [X] Add install app button and promt for pwa
 - [X] rename the app to OuchTracker
 - [X] change the favicon just to a red cross on pwa and on docs
+- [X] add stay loged in togle switch on login and logic localstorage refresh token 
+- [ ] add i18n
+- [X] move profile settings abobe the user on on drawer
+- [ ] add offline capabilities for installed pwa and sync when online
+- [X] add dark mode button on login page
+- [X] make the ui flat
+- [X] Add scafolding until the data loads

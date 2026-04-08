@@ -7,7 +7,7 @@
         :to="backRoute" />
       <div class="col">
         <div class="text-h5 text-negative row items-center">
-          <q-icon name="warning" class="q-mr-sm" />Incident Report
+          <q-icon name="warning" class="q-mr-sm" />{{ $t('incidents.fileIncident') }}
         </div>
         <div class="text-caption text-grey-6" v-if="kit">Kit: <strong>{{ kit.name }}</strong></div>
       </div>
@@ -22,7 +22,7 @@
       <!-- Description -->
       <q-input
         v-model="description"
-        label="Incident Description (optional)"
+        :label="$t('incidents.description')"
         outlined dense type="textarea" autogrow :rows="2"
         class="q-mb-md"
       >
@@ -33,7 +33,7 @@
       <q-input
         v-model="search"
         outlined dense clearable
-        placeholder="Search items by name, category, location…"
+        :placeholder="$t('incidents.selectItem')"
         class="q-mb-sm"
         @focus="showResults = true"
         @blur="onSearchBlur"
@@ -77,7 +77,7 @@
       <!-- Incident items list -->
       <div v-if="incidentItems.length" class="q-mb-xl">
         <div class="text-subtitle2 text-grey-7 q-mb-sm">
-          Items to report ({{ incidentItems.length }})
+          {{ $t('incidents.addItem') }} ({{ incidentItems.length }})
         </div>
 
         <q-card
@@ -91,7 +91,7 @@
               <div class="col text-weight-medium">{{ item.name }}</div>
               <q-input
                 v-model.number="item.quantityUsed"
-                type="number" outlined dense label="Used"
+                type="number" outlined dense :label="$t('incidents.quantityUsed')"
                 min="0" :max="item.quantity"
                 style="width: 90px"
                 :rules="[(v) => v >= 0 || '≥0']"
@@ -103,7 +103,7 @@
             <!-- Row 2: notes paragraph -->
             <q-input
               v-model="item.notes"
-              outlined dense label="Notes" clearable
+              outlined dense :label="$t('incidents.itemNotes')" clearable
               type="textarea" autogrow :rows="2"
             />
           </q-card-section>
@@ -118,9 +118,9 @@
 
     <!-- ── Sticky submit bar ──────────────────────────────────────────────────── -->
     <div class="submit-bar" v-if="kit && !loading">
-      <q-btn no-caps rounded flat label="Cancel" :to="backRoute" />
+      <q-btn no-caps rounded flat :label="$t('common.cancel')" :to="backRoute" />
       <q-btn no-caps rounded
-        unelevated color="negative" icon="send" label="Submit Report"
+        unelevated color="negative" icon="send" :label="$t('incidents.submitReport')"
         :loading="submitting"
         :disable="incidentItems.length === 0"
         @click="submit"
@@ -131,11 +131,11 @@
     <q-dialog v-model="successDialog" persistent>
       <q-card class="text-center q-pa-lg" style="min-width: 300px">
         <q-icon name="check_circle" color="positive" size="64px" class="q-mb-md" />
-        <div class="text-h6 q-mb-xs">Report Submitted!</div>
+        <div class="text-h6 q-mb-xs">{{ $t('incidents.reportSubmitted') }}</div>
         <div class="text-body2 text-grey-7 q-mb-lg">
           Quantities have been updated for <strong>{{ kit?.name }}</strong>.
         </div>
-        <q-btn no-caps rounded unelevated color="primary" label="Back to Dashboard"
+        <q-btn no-caps rounded unelevated color="primary" :label="$t('common.backToDashboard')"
           :to="backRoute" />
       </q-card>
     </q-dialog>
@@ -146,9 +146,11 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, type RouteLocationRaw } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { kitsApi, incidentsApi, type Kit } from 'src/services/api';
 import { useNotify } from 'src/composables/useNotify';
 
+const { t } = useI18n();
 const route = useRoute();
 const notify = useNotify();
 const kitId = route.params.id as string;
@@ -225,7 +227,7 @@ async function submit() {
     });
     successDialog.value = true;
   } catch (e) {
-    notify.error(e, 'Failed to submit report');
+    notify.error(e, t('incidents.submitReport'));
   } finally {
     submitting.value = false;
   }

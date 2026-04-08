@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
     <div class="row items-center q-mb-md">
-      <div class="text-h5"><q-icon name="warning" class="q-mr-sm" color="negative" />Incident Reports</div>
+      <div class="text-h5"><q-icon name="warning" class="q-mr-sm" color="negative" />{{ $t('incidents.title') }}</div>
       <q-space />
       <q-select
         v-model="filterKitId"
@@ -51,14 +51,14 @@
             <q-td colspan="100%" style="padding: 0;">
               <div class="q-pa-sm" style="max-height: 260px; overflow-y: auto;">
                 <div v-if="props.row.description" class="q-mb-sm text-caption text-grey-8">
-                  <strong>Description:</strong> {{ props.row.description }}
+                  <strong>{{ $t('incidents.description') }}:</strong> {{ props.row.description }}
                 </div>
                 <q-markup-table dense flat bordered separator="cell">
                   <thead>
                     <tr :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-2'">
-                      <th class="text-left">Item</th>
-                      <th>Qty Used</th>
-                      <th class="text-left">Notes</th>
+                      <th class="text-left">{{ $t('kitDetail.itemName') }}</th>
+                      <th>{{ $t('incidents.quantityUsed') }}</th>
+                      <th class="text-left">{{ $t('incidents.itemNotes') }}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -77,7 +77,7 @@
         <template #no-data>
           <div class="full-width column flex-center q-pa-xl text-grey-5">
             <q-icon name="warning" size="48px" class="q-mb-sm" />
-            No incident reports yet.
+            {{ $t('incidents.noReports') }}
           </div>
         </template>
       </q-table>
@@ -88,7 +88,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useQuasar, date, type QTableColumn } from 'quasar';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const $q = useQuasar();
 import { incidentsApi, kitsApi, type IncidentReport, type Kit } from 'src/services/api';
 import { useNotify } from 'src/composables/useNotify';
@@ -104,11 +106,11 @@ function formatDate(iso: string) {
 }
 
 const columns: QTableColumn[] = [
-  { name: 'expand',    label: '',          field: () => '',     align: 'center', style: 'width: 48px' },
-  { name: 'createdAt', label: 'Date',      field: 'createdAt',  sortable: true, align: 'left' },
-  { name: 'kit',       label: 'Kit',       field: 'kit',        align: 'left' },
-  { name: 'reporter',  label: 'Reported By', field: 'reportedBy', align: 'left' },
-  { name: 'itemCount', label: 'Items',     field: 'items',      align: 'center' },
+  { name: 'expand',    label: '',                        field: () => '',     align: 'center', style: 'width: 48px' },
+  { name: 'createdAt', label: t('common.date'),          field: 'createdAt',  sortable: true, align: 'left' },
+  { name: 'kit',       label: t('dashboard.kit'),        field: 'kit',        align: 'left' },
+  { name: 'reporter',  label: t('incidents.reporter'),   field: 'reportedBy', align: 'left' },
+  { name: 'itemCount', label: t('incidents.itemCount'),  field: 'items',      align: 'center' },
 ];
 
 async function loadReports() {

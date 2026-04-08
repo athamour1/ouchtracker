@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { authApi, type User } from 'src/services/api';
+import { i18n } from 'src/boot/i18n';
 
 export const useAuthStore = defineStore('auth', () => {
   // ── State ──────────────────────────────────────────────────────────────────
@@ -15,11 +16,18 @@ export const useAuthStore = defineStore('auth', () => {
   const isChecker = computed(() => user.value?.role === 'CHECKER');
 
   // ── Storage helpers ────────────────────────────────────────────────────────
+  function applyLocale(locale?: string) {
+    const l = (locale ?? 'en') as 'en' | 'el';
+    i18n.global.locale.value = l;
+    localStorage.setItem('locale', l);
+  }
+
   function saveSession(accessToken: string, userData: User, refreshToken: string | null) {
     token.value = accessToken;
     user.value = userData;
     localStorage.setItem('access_token', accessToken);
     localStorage.setItem('user', JSON.stringify(userData));
+    applyLocale((userData as User & { locale?: string }).locale);
     if (refreshToken) {
       localStorage.setItem('refresh_token', refreshToken);
       localStorage.setItem('refresh_user_id', userData.id);

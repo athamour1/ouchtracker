@@ -1,9 +1,9 @@
 <template>
   <q-page padding>
     <div class="row items-center q-mb-md">
-      <div class="text-h5"><q-icon name="medical_services" class="q-mr-sm" />Kits</div>
+      <div class="text-h5"><q-icon name="medical_services" class="q-mr-sm" />{{ $t('kits.title') }}</div>
       <q-space />
-      <q-btn no-caps rounded color="primary" icon="add" label="New Kit" unelevated @click="openCreate" />
+      <q-btn no-caps rounded color="primary" icon="add" :label="$t('kits.newKit')" unelevated @click="openCreate" />
     </div>
 
     <!-- Skeleton -->
@@ -27,7 +27,7 @@
         :filter="filter"
       >
         <template #top-right>
-          <q-input v-model="filter" dense outlined placeholder="Search…" debounce="300">
+          <q-input v-model="filter" dense outlined :placeholder="$t('common.search')" debounce="300">
             <template #append><q-icon name="search" /></template>
           </q-input>
         </template>
@@ -40,7 +40,7 @@
                 dense color="primary" text-color="white" icon="person" size="sm"
               >{{ a.fullName }}</q-chip>
             </div>
-            <q-chip v-else dense color="grey-3" label="Unassigned" />
+            <q-chip v-else dense color="grey-3" :label="$t('common.unassigned')" />
           </q-td>
         </template>
 
@@ -78,23 +78,23 @@
     <q-dialog v-model="kitDialogOpen" persistent>
       <q-card style="min-width: 400px">
         <q-card-section class="row items-center">
-          <div class="text-h6">{{ editTarget ? 'Edit Kit' : 'New Kit' }}</div>
+          <div class="text-h6">{{ editTarget ? $t('kits.editKit') : $t('kits.createKit') }}</div>
           <q-space /><q-btn no-caps rounded icon="close" flat round dense v-close-popup />
         </q-card-section>
         <q-separator />
         <q-card-section>
           <q-form ref="kitFormRef" class="q-gutter-sm">
-            <q-input v-model="kitForm.name" label="Kit Name" outlined dense
+            <q-input v-model="kitForm.name" :label="$t('kits.kitName')" outlined dense
               :rules="[(v) => !!v || 'Required']" />
-            <q-input v-model="kitForm.description" label="Description" outlined dense type="textarea" autogrow />
-            <q-input v-model="kitForm.location" label="Physical Location" outlined dense
+            <q-input v-model="kitForm.description" :label="$t('kits.description')" outlined dense type="textarea" autogrow />
+            <q-input v-model="kitForm.location" :label="$t('common.location')" outlined dense
               hint="e.g. Building A – Floor 2, Reception Desk" />
-            <q-toggle v-if="editTarget" v-model="kitForm.isActive" label="Active" />
+            <q-toggle v-if="editTarget" v-model="kitForm.isActive" :label="$t('common.active')" />
           </q-form>
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn no-caps rounded flat label="Cancel" v-close-popup />
-          <q-btn no-caps rounded unelevated color="primary" :label="editTarget ? 'Save' : 'Create'"
+          <q-btn no-caps rounded flat :label="$t('common.cancel')" v-close-popup />
+          <q-btn no-caps rounded unelevated color="primary" :label="editTarget ? $t('common.save') : $t('kits.createKit')"
             :loading="saving" @click="saveKit" />
         </q-card-actions>
       </q-card>
@@ -107,18 +107,18 @@
     <q-dialog v-model="assignDialogOpen" persistent>
       <q-card style="min-width: 380px">
         <q-card-section class="row items-center">
-          <div class="text-h6">Assign Kit</div>
+          <div class="text-h6">{{ $t('kits.assignCheckers') }}</div>
           <q-space /><q-btn no-caps rounded icon="close" flat round dense v-close-popup />
         </q-card-section>
         <q-separator />
         <q-card-section class="q-gutter-sm">
           <div class="text-body2 text-grey-7 q-mb-sm">
-            Kit: <strong>{{ assignTarget?.name }}</strong>
+            {{ $t('kits.kitName') }}: <strong>{{ assignTarget?.name }}</strong>
           </div>
           <q-select
             v-model="assignUserIds"
             :options="userOptions"
-            label="Assign to Users"
+            :label="$t('kits.assignedTo')"
             outlined dense
             emit-value map-options
             multiple use-chips
@@ -126,8 +126,8 @@
           />
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn no-caps rounded flat label="Cancel" v-close-popup />
-          <q-btn no-caps rounded unelevated color="teal" label="Assign" :loading="saving" @click="saveAssign" />
+          <q-btn no-caps rounded flat :label="$t('common.cancel')" v-close-popup />
+          <q-btn no-caps rounded unelevated color="teal" :label="$t('kits.saveAssign')" :loading="saving" @click="saveAssign" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -137,10 +137,12 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive } from 'vue';
 import { useQuasar, type QTableColumn } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import { kitsApi, usersApi, type Kit, type User } from 'src/services/api';
 import { useNotify } from 'src/composables/useNotify';
 import KitQrDialog from 'components/KitQrDialog.vue';
 
+const { t } = useI18n();
 const $q = useQuasar();
 const notify = useNotify();
 const kits = ref<Kit[]>([]);
@@ -172,11 +174,11 @@ const assignUserIds = ref<string[]>([]);
 const userOptions = ref<{ label: string; value: string }[]>([]);
 
 const columns: QTableColumn[] = [
-  { name: 'name',       label: 'Kit Name',   field: 'name',       sortable: true, align: 'left' },
-  { name: 'location',   label: 'Location',   field: 'location',   align: 'left' },
-  { name: 'assignedTo', label: 'Assigned To', field: 'assignedTo', align: 'left' },
-  { name: 'isActive',   label: 'Active',     field: 'isActive',   align: 'center' },
-  { name: 'actions',    label: '',           field: 'id',         align: 'center' },
+  { name: 'name',       label: t('kits.kitName'),    field: 'name',       sortable: true, align: 'left' },
+  { name: 'location',   label: t('common.location'), field: 'location',   align: 'left' },
+  { name: 'assignedTo', label: t('kits.assignedTo'), field: 'assignedTo', align: 'left' },
+  { name: 'isActive',   label: t('common.active'),   field: 'isActive',   align: 'center' },
+  { name: 'actions',    label: '',                   field: 'id',         align: 'center' },
 ];
 
 async function loadData() {
@@ -211,10 +213,10 @@ async function saveKit() {
   try {
     if (editTarget.value) {
       await kitsApi.update(editTarget.value.id, { ...kitForm });
-      notify.success('Kit updated');
+      notify.success(t('kits.kitUpdated'));
     } else {
       await kitsApi.create({ name: kitForm.name, description: kitForm.description, location: kitForm.location });
-      notify.success('Kit created');
+      notify.success(t('kits.kitCreated'));
     }
     kitDialogOpen.value = false;
     void loadData();
@@ -233,7 +235,7 @@ async function saveAssign() {
   saving.value = true;
   try {
     await kitsApi.assign(assignTarget.value.id, assignUserIds.value);
-    notify.success('Kit assignment updated');
+    notify.success(t('kits.kitUpdated'));
     assignDialogOpen.value = false;
     void loadData();
   } catch (e) { notify.error(e); }
@@ -242,11 +244,11 @@ async function saveAssign() {
 
 function confirmDelete(kit: Kit) {
   $q.dialog({
-    title: 'Delete kit', html: true, cancel: true,
-    message: `Delete <strong>${kit.name}</strong> and all its items? This cannot be undone.`,
-    ok: { label: 'Delete', color: 'negative', unelevated: true },
+    title: t('kits.deleteKit'), html: true, cancel: true,
+    message: `${t('kits.confirmDelete')} <strong>${kit.name}</strong>?`,
+    ok: { label: t('common.delete'), color: 'negative', unelevated: true },
   }).onOk(async () => {
-    try { await kitsApi.remove(kit.id); notify.success('Kit deleted'); void loadData(); }
+    try { await kitsApi.remove(kit.id); notify.success(t('kits.kitDeleted')); void loadData(); }
     catch (e) { notify.error(e); }
   });
 }

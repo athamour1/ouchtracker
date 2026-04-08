@@ -28,6 +28,7 @@ model User {
   fullName  String
   role      Role     @default(CHECKER)
   isActive          Boolean  @default(true)
+  locale            String   @default("en") // UI language preference: "en" | "el"
   refreshTokenHash  String?  // bcrypt hash of the refresh token; null = no active session
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -24,7 +24,7 @@
         <!-- Incident Report -->
         <q-btn no-caps rounded
           unelevated color="negative" size="xl"
-          icon="warning" label="Incident Report"
+          icon="warning" :label="$t('incidents.fileIncident')"
           class="landing-btn"
           :to="{ name: 'kit-incident', params: { id: kit.id }, query: { from: 'qr' } }"
         >
@@ -44,7 +44,7 @@
         <!-- Start Inspection -->
         <q-btn no-caps rounded
           unelevated color="teal" size="xl"
-          icon="fact_check" label="Start Inspection"
+          icon="fact_check" :label="$t('kits.startInspection')"
           class="landing-btn"
           :to="{ name: 'kit-inspect', params: { id: kit.id }, query: { from: 'qr' } }"
         />
@@ -52,7 +52,7 @@
       </div>
     </template>
 
-    <div v-else class="text-grey-6 text-h6">Kit not found.</div>
+    <div v-else class="text-grey-6 text-h6">{{ $t('errors.notFound') }}</div>
 
   </q-page>
 </template>
@@ -61,9 +61,11 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import { kitsApi, type Kit } from 'src/services/api';
 import { useAuthStore } from 'stores/auth.store';
 
+const { t: _t } = useI18n();
 const $q = useQuasar();
 
 const route = useRoute();

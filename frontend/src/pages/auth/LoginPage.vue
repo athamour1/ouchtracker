@@ -7,7 +7,7 @@
       class="dark-toggle text-white"
       @click="toggleDark"
     >
-      <q-tooltip>{{ $q.dark.isActive ? 'Light mode' : 'Dark mode' }}</q-tooltip>
+      <q-tooltip>{{ $q.dark.isActive ? $t('theme.lightMode') : $t('theme.darkMode') }}</q-tooltip>
     </q-btn>
 
     <q-card class="login-card q-pa-lg">
@@ -15,7 +15,7 @@
       <q-card-section class="text-center q-pb-sm">
         <q-icon name="medical_services" size="56px" color="primary" />
         <div class="text-h5 text-weight-bold q-mt-sm">OuchTracker</div>
-        <div class="text-caption text-grey-6">Injury & Kit Tracker</div>
+        <div class="text-caption text-grey-6">{{ $t('app.subtitle') }}</div>
       </q-card-section>
 
       <!-- Login form -->
@@ -24,7 +24,7 @@
           <q-input
             v-model="email"
             type="email"
-            label="Email address"
+            :label="$t('auth.emailAddress')"
             outlined
             dense
             autocomplete="email"
@@ -41,7 +41,7 @@
           <q-input
             v-model="password"
             :type="showPassword ? 'text' : 'password'"
-            label="Password"
+            :label="$t('auth.password')"
             outlined
             dense
             autocomplete="current-password"
@@ -62,7 +62,7 @@
           <!-- Stay logged in -->
           <q-toggle
             v-model="stayLoggedIn"
-            label="Stay logged in"
+            :label="$t('auth.stayLoggedIn')"
             color="primary"
             dense
           />
@@ -81,7 +81,7 @@
 
           <q-btn no-caps rounded
             type="submit"
-            label="Sign in"
+            :label="$t('auth.signIn')"
             color="primary"
             class="full-width"
             unelevated
@@ -99,8 +99,10 @@ import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 // @ts-expect-error — quasar types are resolved inside the Docker container; not available locally
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import { useAuthStore } from 'stores/auth.store';
 
+const { t } = useI18n();
 const $q = useQuasar();
 
 function toggleDark() {
@@ -123,7 +125,7 @@ async function handleLogin() {
 
   const success = await authStore.login(email.value, password.value, stayLoggedIn.value);
   if (!success) {
-    loginError.value = authStore.error ?? 'Login failed. Please check your credentials.';
+    loginError.value = authStore.error ?? t('auth.loginFailed');
     return;
   }
 

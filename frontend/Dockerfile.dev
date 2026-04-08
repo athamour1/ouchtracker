@@ -11,7 +11,7 @@ RUN npm install -g @quasar/cli
 
 # Install project dependencies (cached layer)
 COPY package*.json ./
-RUN npm install --ignore-scripts && npm install jspdf jspdf-autotable
+RUN npm install --ignore-scripts && npm install jspdf jspdf-autotable vue-i18n@9
 
 # Config files — source mounted at runtime
 COPY quasar.config.* ./

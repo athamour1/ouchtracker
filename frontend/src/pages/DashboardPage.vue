@@ -5,7 +5,7 @@
     <template v-if="authStore.isAdmin">
       <div class="text-h5 q-mb-lg">
         <q-icon name="dashboard" class="q-mr-sm" />
-        Admin Dashboard
+        {{ $t('dashboard.adminTitle') }}
       </div>
 
       <!-- Summary widgets -->
@@ -14,7 +14,7 @@
           <StatCard
             icon="medical_services"
             icon-color="primary"
-            label="Total Active Kits"
+            :label="$t('dashboard.totalActiveKits')"
             :value="summary?.totalKits ?? 0"
             :loading="loading"
           />
@@ -23,7 +23,7 @@
           <StatCard
             icon="inventory_2"
             icon-color="teal"
-            label="Total Items"
+            :label="$t('dashboard.totalItems')"
             :value="summary?.totalItems ?? 0"
             :loading="loading"
           />
@@ -32,7 +32,7 @@
           <StatCard
             icon="warning"
             icon-color="warning"
-            label="Expiring Soon (30d)"
+            :label="$t('dashboard.expiringSoon')"
             :value="summary?.expiringSoonCount ?? 0"
             :loading="loading"
             :alert="(summary?.expiringSoonCount ?? 0) > 0"
@@ -42,7 +42,7 @@
           <StatCard
             icon="dangerous"
             icon-color="negative"
-            label="Already Expired"
+            :label="$t('dashboard.alreadyExpired')"
             :value="summary?.expiredCount ?? 0"
             :loading="loading"
             :alert="(summary?.expiredCount ?? 0) > 0"
@@ -75,7 +75,7 @@
         <q-card-section class="row items-center q-pb-none">
           <div class="text-subtitle1 text-weight-medium text-negative">
             <q-icon name="warning" class="q-mr-xs" />
-            Items Needing Attention ({{ attentionItems.length }})
+            {{ $t('dashboard.itemsNeedingAttention') }} ({{ attentionItems.length }})
           </div>
         </q-card-section>
         <q-card-section>
@@ -96,12 +96,12 @@
               </q-item-section>
               <q-item-section>
                 <q-item-label>{{ item.itemName }}</q-item-label>
-                <q-item-label caption>Kit: {{ item.kitName }}</q-item-label>
+                <q-item-label caption>{{ $t('dashboard.kit') }}: {{ item.kitName }}</q-item-label>
               </q-item-section>
               <q-item-section side>
                 <q-badge
                   :color="item.isExpired ? 'negative' : 'warning'"
-                  :label="item.isExpired ? 'Expired' : 'Expiring soon'"
+                  :label="item.isExpired ? $t('dashboard.expired') : $t('dashboard.expiringSoonBadge')"
                 />
               </q-item-section>
             </q-item>
@@ -114,7 +114,7 @@
         <q-card-section class="row items-center q-pb-none">
           <div class="text-subtitle1 text-weight-medium">
             <q-icon name="fact_check" class="q-mr-xs" />
-            Recent Inspections
+            {{ $t('dashboard.recentInspections') }}
           </div>
           <q-space />
           <q-btn no-caps rounded flat dense size="sm" label="View all" icon-right="arrow_forward"
@@ -152,7 +152,7 @@
               <q-item-section>
                 <q-item-label>{{ log.inspectedBy.fullName }}</q-item-label>
                 <q-item-label caption>
-                  Kit: <strong>{{ log.kit.name }}</strong>
+                  {{ $t('dashboard.kit') }}: <strong>{{ log.kit.name }}</strong>
                 </q-item-label>
               </q-item-section>
               <q-item-section side>
@@ -162,7 +162,7 @@
           </q-list>
 
           <div v-else class="text-grey-6 text-center q-py-md">
-            No inspections yet.
+            {{ $t('dashboard.noInspectionsYet') }}
           </div>
         </q-card-section>
       </q-card>
@@ -171,30 +171,30 @@
     <!-- ── Checker Dashboard ─────────────────────────────────────────────────── -->
     <template v-else>
       <div class="text-h5 q-mb-lg">
-        Welcome, {{ authStore.user?.fullName }}!
+        {{ $t('dashboard.welcomeChecker', { name: authStore.user?.fullName }) }}
       </div>
 
       <!-- Checker summary widgets -->
       <div class="row q-col-gutter-md q-mb-lg">
         <div class="col-12 col-sm-4">
           <StatCard icon="inventory" icon-color="primary"
-            label="Assigned Kits" :value="myKits.length" :loading="myKitsLoading" />
+            :label="$t('dashboard.assignedKits')" :value="myKits.length" :loading="myKitsLoading" />
         </div>
         <div class="col-12 col-sm-4">
           <StatCard icon="dangerous" icon-color="negative"
-            label="Expired Items" :value="totalExpired" :loading="myKitsLoading"
+            :label="$t('dashboard.expiredItems')" :value="totalExpired" :loading="myKitsLoading"
             :alert="totalExpired > 0" />
         </div>
         <div class="col-12 col-sm-4">
           <StatCard icon="warning" icon-color="warning"
-            label="Expiring Soon" :value="totalExpiringSoon" :loading="myKitsLoading"
+            :label="$t('dashboard.expiringSoonItems')" :value="totalExpiringSoon" :loading="myKitsLoading"
             :alert="totalExpiringSoon > 0" />
         </div>
       </div>
 
       <!-- Quick-access kit cards -->
       <div class="text-subtitle1 text-weight-medium q-mb-sm">
-        <q-icon name="bolt" class="q-mr-xs" />Quick access
+        <q-icon name="bolt" class="q-mr-xs" />{{ $t('dashboard.quickAccess') }}
       </div>
 
       <div v-if="myKitsLoading" class="row q-col-gutter-md">
@@ -204,7 +204,7 @@
       </div>
 
       <div v-else-if="!myKits.length" class="text-grey-6 q-py-md">
-        No kits assigned yet. Contact your admin.
+        {{ $t('dashboard.noKitsAssigned') }}
       </div>
 
       <div v-else class="row q-col-gutter-md">
@@ -215,7 +215,7 @@
               <q-icon name="medical_services" color="primary" size="24px" class="q-mr-sm" />
               <div class="col">
                 <div class="text-weight-medium">{{ kit.name }}</div>
-                <div class="text-caption text-grey-6">{{ kit.location || 'No location' }}</div>
+                <div class="text-caption text-grey-6">{{ kit.location || $t('dashboard.noLocation') }}</div>
               </div>
               <q-badge v-if="kitExpiredCount(kit) > 0" color="negative" :label="`${kitExpiredCount(kit)} expired`" />
               <q-icon name="chevron_right" color="grey-5" />
@@ -226,7 +226,7 @@
 
       <q-btn no-caps rounded
         v-if="myKits.length"
-        flat color="primary" label="View all my kits"
+        flat color="primary" :label="$t('dashboard.viewAllKits')"
         icon-right="arrow_forward" to="/my-kits"
         class="q-mt-md"
       />
@@ -238,11 +238,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { alertsApi, kitsApi, type AlertSummary, type Kit } from 'src/services/api';
 import { useAuthStore } from 'stores/auth.store';
 import StatCard from 'components/StatCard.vue';
 import { date } from 'quasar';
 
+const { t: _t } = useI18n();
 const authStore = useAuthStore();
 const router = useRouter();
 

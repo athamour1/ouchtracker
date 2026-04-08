@@ -11,11 +11,11 @@
           <q-skeleton v-else type="text" width="200px" />
           <div class="text-caption text-grey-6" v-if="kit">
             <q-icon name="location_on" size="14px" />
-            {{ kit.location || 'No location set' }}
+            {{ kit.location || $t('kits.noLocation') }}
             &nbsp;·&nbsp;
             <q-icon name="person" size="14px" />
             <span v-if="kit.assignees.length">{{ kit.assignees.map(a => a.fullName).join(', ') }}</span>
-            <span v-else>Unassigned</span>
+            <span v-else>{{ $t('common.unassigned') }}</span>
           </div>
         </div>
       </div>
@@ -23,12 +23,12 @@
       <div class="row q-gutter-sm">
         <q-btn no-caps rounded
           v-if="authStore.isChecker"
-          color="teal" icon="fact_check" label="Start Inspection" unelevated
+          color="teal" icon="fact_check" :label="$t('kits.startInspection')" unelevated
           :to="{ name: 'kit-inspect', params: { id: kitId } }"
         />
-        <q-btn no-caps rounded color="secondary" icon="upload_file" label="Import CSV" unelevated @click="openImport" />
-        <q-btn no-caps rounded color="primary" icon="add" label="Add Item" unelevated @click="openAddItem" />
-        <q-btn no-caps rounded color="deep-orange" icon="picture_as_pdf" label="Export BoM" unelevated :loading="exportingPdf" @click="exportPdf" />
+        <q-btn no-caps rounded color="secondary" icon="upload_file" :label="$t('kits.importCsv')" unelevated @click="openImport" />
+        <q-btn no-caps rounded color="primary" icon="add" :label="$t('kits.addItem')" unelevated @click="openAddItem" />
+        <q-btn no-caps rounded color="deep-orange" icon="picture_as_pdf" :label="$t('kits.exportBom')" unelevated :loading="exportingPdf" @click="exportPdf" />
       </div>
     </div>
 
@@ -66,7 +66,7 @@
           <q-input
             v-model="search"
             dense outlined clearable
-            placeholder="Search by name, category, unit, quantity, expiry, location, notes…"
+            :placeholder="$t('common.search')"
             style="width: 100%"
             debounce="150"
           >
@@ -119,28 +119,28 @@
     <q-dialog v-model="addDialogOpen" persistent>
       <q-card style="min-width: 420px">
         <q-card-section class="row items-center">
-          <div class="text-h6">Add Item to Kit</div>
+          <div class="text-h6">{{ $t('kitDetail.addItem') }}</div>
           <q-space /><q-btn no-caps rounded icon="close" flat round dense v-close-popup />
         </q-card-section>
         <q-separator />
         <q-card-section>
           <q-form ref="addFormRef" class="column q-gutter-sm">
-            <q-input v-model="addForm.name" label="Item Name *" outlined dense
+            <q-input v-model="addForm.name" :label="$t('kitDetail.itemName') + ' *'" outlined dense
               :rules="[(v) => !!v || 'Required']" />
-            <q-input v-model="addForm.category" label="Category" outlined dense />
-            <q-input v-model="addForm.unit" label="Unit" outlined dense />
-            <q-input v-model.number="addForm.quantity" label="Quantity *" type="number"
+            <q-input v-model="addForm.category" :label="$t('kitDetail.category')" outlined dense />
+            <q-input v-model="addForm.unit" :label="$t('kitDetail.unit')" outlined dense />
+            <q-input v-model.number="addForm.quantity" :label="$t('kitDetail.quantity') + ' *'" type="number"
               outlined dense :rules="[(v) => v >= 0 || 'Must be ≥ 0']" />
-            <q-input v-model="addForm.expirationDate" label="Expiration Date"
+            <q-input v-model="addForm.expirationDate" :label="$t('kitDetail.expirationDate')"
               outlined dense type="date" stack-label />
-            <q-input v-model="addForm.locationInKit" label="Location in Kit" outlined dense />
-            <q-input v-model="addForm.notes" label="Notes" outlined dense
+            <q-input v-model="addForm.locationInKit" :label="$t('kitDetail.locationInKit')" outlined dense />
+            <q-input v-model="addForm.notes" :label="$t('common.notes')" outlined dense
               type="textarea" autogrow :rows="2" />
           </q-form>
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn no-caps rounded flat label="Cancel" v-close-popup />
-          <q-btn no-caps rounded unelevated color="primary" label="Add" :loading="saving" @click="saveAddItem" />
+          <q-btn no-caps rounded flat :label="$t('common.cancel')" v-close-popup />
+          <q-btn no-caps rounded unelevated color="primary" :label="$t('kitDetail.ok')" :loading="saving" @click="saveAddItem" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -149,28 +149,28 @@
     <q-dialog v-model="editDialogOpen" persistent>
       <q-card style="min-width: 420px">
         <q-card-section class="row items-center">
-          <div class="text-h6">Edit: {{ editItemTarget?.name }}</div>
+          <div class="text-h6">{{ $t('kitDetail.editItem') }}: {{ editItemTarget?.name }}</div>
           <q-space /><q-btn no-caps rounded icon="close" flat round dense v-close-popup />
         </q-card-section>
         <q-separator />
         <q-card-section>
           <q-form ref="editFormRef" class="column q-gutter-sm">
-            <q-input v-model="editForm.name" label="Item Name *" outlined dense
+            <q-input v-model="editForm.name" :label="$t('kitDetail.itemName') + ' *'" outlined dense
               :rules="[(v) => !!v || 'Required']" />
-            <q-input v-model="editForm.category" label="Category" outlined dense />
-            <q-input v-model="editForm.unit" label="Unit" outlined dense />
-            <q-input v-model.number="editForm.quantity" label="Quantity" type="number"
+            <q-input v-model="editForm.category" :label="$t('kitDetail.category')" outlined dense />
+            <q-input v-model="editForm.unit" :label="$t('kitDetail.unit')" outlined dense />
+            <q-input v-model.number="editForm.quantity" :label="$t('kitDetail.quantity')" type="number"
               outlined dense :rules="[(v) => v >= 0 || 'Must be ≥ 0']" />
-            <q-input v-model="editForm.expirationDate" label="Expiration Date"
+            <q-input v-model="editForm.expirationDate" :label="$t('kitDetail.expirationDate')"
               outlined dense type="date" stack-label clearable />
-            <q-input v-model="editForm.locationInKit" label="Location in Kit" outlined dense />
-            <q-input v-model="editForm.notes" label="Notes" outlined dense
+            <q-input v-model="editForm.locationInKit" :label="$t('kitDetail.locationInKit')" outlined dense />
+            <q-input v-model="editForm.notes" :label="$t('common.notes')" outlined dense
               type="textarea" autogrow :rows="2" />
           </q-form>
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn no-caps rounded flat label="Cancel" v-close-popup />
-          <q-btn no-caps rounded unelevated color="primary" label="Save" :loading="saving" @click="saveEditItem" />
+          <q-btn no-caps rounded flat :label="$t('common.cancel')" v-close-popup />
+          <q-btn no-caps rounded unelevated color="primary" :label="$t('common.save')" :loading="saving" @click="saveEditItem" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -179,7 +179,7 @@
     <q-dialog v-model="importDialogOpen" persistent style="max-width: 800px">
       <q-card style="min-width: min(760px, 95vw)">
         <q-card-section class="row items-center">
-          <div class="text-h6">Import Items from CSV / TSV</div>
+          <div class="text-h6">{{ $t('kitDetail.importCsv') }}</div>
           <q-space /><q-btn no-caps rounded icon="close" flat round dense v-close-popup @click="resetImport" />
         </q-card-section>
         <q-separator />
@@ -253,7 +253,7 @@
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn no-caps rounded flat label="Cancel" @click="resetImport" v-close-popup />
+          <q-btn no-caps rounded flat :label="$t('common.cancel')" @click="resetImport" v-close-popup />
           <q-btn no-caps rounded v-if="importStep === 1" unelevated color="primary" label="Parse"
             :disable="!importRaw.trim()" @click="parseImport" />
           <q-btn no-caps rounded v-if="importStep === 2" flat label="Back" @click="importStep = 1" />
@@ -274,6 +274,7 @@
 import { ref, onMounted, reactive, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useQuasar, date, type QTableColumn } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import { kitsApi, type Kit, type KitItem } from 'src/services/api';
 import { useNotify } from 'src/composables/useNotify';
 import { useAuthStore } from 'stores/auth.store';
@@ -281,6 +282,7 @@ import ExpiryBadge from 'components/ExpiryBadge.vue';
 import BomPreviewDialog from 'components/BomPreviewDialog.vue';
 import { buildBomHtml } from 'src/composables/useKitPdf';
 
+const { t } = useI18n();
 const authStore = useAuthStore();
 
 const route = useRoute();
@@ -324,15 +326,15 @@ function formatDate(iso: string) {
 }
 
 const columns: QTableColumn[] = [
-  { name: 'name',           label: 'Item',     field: 'name',           align: 'left',   sortable: true },
-  { name: 'category',       label: 'Category', field: 'category',       align: 'left',   sortable: true },
-  { name: 'unit',           label: 'Unit',     field: 'unit',           align: 'left',   sortable: true },
-  { name: 'quantity',       label: 'Qty',      field: 'quantity',       align: 'center', sortable: true },
-  { name: 'locationInKit',  label: 'Location', field: 'locationInKit',  align: 'left',   sortable: true },
-  { name: 'expirationDate', label: 'Expires',  field: 'expirationDate', align: 'left',   sortable: true },
-  { name: 'isValid',        label: 'Status',   field: 'isValid',        align: 'center', sortable: true },
-  { name: 'notes',          label: 'Notes',    field: 'notes',          align: 'left',   sortable: true },
-  { name: 'actions',        label: '',         field: 'id',             align: 'center' },
+  { name: 'name',           label: t('kitDetail.itemName'),      field: 'name',           align: 'left',   sortable: true },
+  { name: 'category',       label: t('kitDetail.category'),      field: 'category',       align: 'left',   sortable: true },
+  { name: 'unit',           label: t('kitDetail.unit'),          field: 'unit',           align: 'left',   sortable: true },
+  { name: 'quantity',       label: t('kitDetail.quantity'),      field: 'quantity',       align: 'center', sortable: true },
+  { name: 'locationInKit',  label: t('kitDetail.locationInKit'), field: 'locationInKit',  align: 'left',   sortable: true },
+  { name: 'expirationDate', label: t('kitDetail.expirationDate'),field: 'expirationDate', align: 'left',   sortable: true },
+  { name: 'isValid',        label: t('common.status'),           field: 'isValid',        align: 'center', sortable: true },
+  { name: 'notes',          label: t('common.notes'),            field: 'notes',          align: 'left',   sortable: true },
+  { name: 'actions',        label: '',                           field: 'id',             align: 'center' },
 ];
 
 // ── Expiry helpers ────────────────────────────────────────────────────────────
@@ -408,7 +410,7 @@ async function saveAddItem() {
       ...(addForm.expirationDate && { expirationDate:  addForm.expirationDate }),
       ...(addForm.notes          && { notes:           addForm.notes }),
     });
-    notify.success('Item added to kit');
+    notify.success(t('kitDetail.itemAdded'));
     addDialogOpen.value = false;
     void loadKit();
   } catch (e) { notify.error(e); }
@@ -444,7 +446,7 @@ async function saveEditItem() {
       ...(editForm.locationInKit && { locationInKit: editForm.locationInKit }),
       ...(editForm.notes         && { notes:         editForm.notes }),
     });
-    notify.success('Item updated');
+    notify.success(t('kitDetail.itemUpdated'));
     editDialogOpen.value = false;
     void loadKit();
   } catch (e) { notify.error(e); }
@@ -453,11 +455,11 @@ async function saveEditItem() {
 
 function confirmRemoveItem(item: KitItem) {
   $q.dialog({
-    title: 'Remove item', html: true, cancel: true,
-    message: `Remove <strong>${item.name}</strong> from this kit?`,
-    ok: { label: 'Remove', color: 'negative', unelevated: true },
+    title: t('kitDetail.deleteItem'), html: true, cancel: true,
+    message: `${t('kitDetail.confirmDeleteItem')} <strong>${item.name}</strong>?`,
+    ok: { label: t('common.delete'), color: 'negative', unelevated: true },
   }).onOk(async () => {
-    try { await kitsApi.removeItem(kitId, item.id); notify.success('Item removed'); void loadKit(); }
+    try { await kitsApi.removeItem(kitId, item.id); notify.success(t('kitDetail.itemDeleted')); void loadKit(); }
     catch (e) { notify.error(e); }
   });
 }

@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
     <div class="text-h5 q-mb-md">
-      <q-icon name="fact_check" class="q-mr-sm" />My Inspection History
+      <q-icon name="fact_check" class="q-mr-sm" />{{ $t('inspections.myTitle') }}
     </div>
 
     <!-- Skeleton -->
@@ -48,10 +48,10 @@
                 <q-markup-table dense flat bordered separator="cell">
                   <thead>
                     <tr :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-2'">
-                      <th class="text-left">Item</th>
-                      <th>Qty Found</th>
-                      <th>Expiry Found</th>
-                      <th class="text-left">Notes</th>
+                      <th class="text-left">{{ $t('kitDetail.itemName') }}</th>
+                      <th>{{ $t('inspections.quantityFound') }}</th>
+                      <th>{{ $t('inspections.expirationDate') }}</th>
+                      <th class="text-left">{{ $t('inspections.itemNotes') }}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -73,7 +73,7 @@
         <template #no-data>
           <div class="full-width column flex-center q-pa-xl text-grey-5">
             <q-icon name="fact_check" size="48px" class="q-mb-sm" />
-            No inspections submitted yet.
+            {{ $t('inspections.noLogs') }}
           </div>
         </template>
       </q-table>
@@ -84,7 +84,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useQuasar, date, type QTableColumn } from 'quasar';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const $q = useQuasar();
 import { inspectionsApi, type InspectionLog } from 'src/services/api';
 import { useNotify } from 'src/composables/useNotify';
@@ -98,10 +100,10 @@ function formatDate(iso: string) {
 }
 
 const columns: QTableColumn[] = [
-  { name: 'expand',    label: '',      field: () => '',    align: 'center', style: 'width: 48px' },
-  { name: 'createdAt', label: 'Date',  field: 'createdAt', sortable: true,  align: 'left' },
-  { name: 'kit',       label: 'Kit',   field: 'kit',       align: 'left' },
-  { name: 'itemCount', label: 'Items', field: 'items',     align: 'center' },
+  { name: 'expand',    label: '',                        field: () => '',    align: 'center', style: 'width: 48px' },
+  { name: 'createdAt', label: t('common.date'),          field: 'createdAt', sortable: true,  align: 'left' },
+  { name: 'kit',       label: t('dashboard.kit'),        field: 'kit',       align: 'left' },
+  { name: 'itemCount', label: t('inspections.itemCount'),field: 'items',     align: 'center' },
 ];
 
 onMounted(async () => {

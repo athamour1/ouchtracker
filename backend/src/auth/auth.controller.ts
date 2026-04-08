@@ -37,11 +37,11 @@ export class AuthController {
   }
 
   /**
-   * GET /api/auth/me
+   * GET /api/auth/me — returns full user profile including locale
    */
   @UseGuards(JwtAuthGuard)
   @Get('me')
   me(@Request() req) {
-    return req.user;
+    return this.authService.getProfile(req.user.id);
   }
 }

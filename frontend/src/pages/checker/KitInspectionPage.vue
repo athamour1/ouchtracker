@@ -12,7 +12,7 @@
           <q-skeleton v-else type="text" width="180px" />
           <div class="text-caption text-grey-6" v-if="kit">
             <q-icon name="location_on" size="14px" />
-            {{ kit.location || 'No location set' }}
+            {{ kit.location || $t('kits.noLocation') }}
             &nbsp;·&nbsp;{{ kit.kitItems.length }} item(s)
           </div>
         </div>
@@ -50,7 +50,7 @@
         <div class="col-12 col-sm-6">
           <q-input
             v-model="search"
-            placeholder="Search items…"
+            :placeholder="$t('common.search')"
             outlined dense clearable
             bg-color="transparent"
           >
@@ -113,7 +113,7 @@
               <div class="row q-gutter-xs items-center">
                 <q-badge
                   :color="item.currentIsValid ? 'positive' : 'negative'"
-                  :label="item.currentIsValid ? 'Valid' : 'Expired'"
+                  :label="item.currentIsValid ? $t('common.active') : $t('dashboard.expired')"
                 />
                 <q-icon v-if="item.checked" name="check_circle" color="positive" size="20px" />
               </div>
@@ -121,7 +121,7 @@
             <div class="row q-gutter-md q-mt-xs text-caption text-grey-7">
               <span>
                 <q-icon name="inventory_2" size="12px" />
-                Previous qty: <strong>{{ item.previousQuantity }}</strong>
+                {{ $t('inspections.previousQty') }}: <strong>{{ item.previousQuantity }}</strong>
               </span>
               <span v-if="item.previousExpiry">
                 <q-icon name="event" size="12px" />
@@ -137,7 +137,7 @@
               <div class="col-12 col-sm-4">
                 <q-input
                   v-model.number="item.quantityFound"
-                  label="Quantity Found" type="number"
+                  :label="$t('inspections.quantityFound')" type="number"
                   outlined dense min="0"
                   :rules="[(v) => v >= 0 || 'Must be ≥ 0']"
                   @update:model-value="markChecked(item)"
@@ -148,7 +148,7 @@
               <div class="col-12 col-sm-4">
                 <q-input
                   v-model="item.expirationDateFound"
-                  label="Expiration Date" outlined dense type="date" clearable
+                  :label="$t('inspections.expirationDate')" outlined dense type="date" clearable
                   @update:model-value="markChecked(item)"
                 >
                   <template #prepend><q-icon name="event" /></template>
@@ -157,7 +157,7 @@
               <div class="col-12 col-sm-4">
                 <q-input
                   v-model="item.notes"
-                  label="Notes" outlined dense clearable
+                  :label="$t('inspections.itemNotes')" outlined dense clearable
                   @update:model-value="markChecked(item)"
                 >
                   <template #prepend><q-icon name="notes" /></template>
@@ -175,7 +175,7 @@
       <q-separator class="q-mb-md" />
       <q-input
         v-model="overallNotes"
-        label="Overall Inspection Notes (optional)"
+        :label="$t('inspections.overallNotes')"
         outlined dense
         type="textarea"
         autogrow
@@ -185,11 +185,11 @@
         <template #prepend><q-icon name="edit_note" /></template>
       </q-input>
       <div class="row items-center">
-        <q-btn no-caps rounded flat label="Cancel" :to="backRoute" />
+        <q-btn no-caps rounded flat :label="$t('common.cancel')" :to="backRoute" />
         <q-space />
         <q-btn no-caps rounded
           unelevated color="primary" size="md"
-          icon="send" label="Submit Inspection"
+          icon="send" :label="$t('inspections.submitInspection')"
           :loading="submitting"
           :disable="!items.length"
           @click="submitInspection"
@@ -201,11 +201,11 @@
     <q-dialog v-model="successDialog" persistent>
       <q-card class="text-center q-pa-lg" style="min-width: 300px">
         <q-icon name="check_circle" color="positive" size="64px" class="q-mb-md" />
-        <div class="text-h6 q-mb-xs">Inspection Submitted!</div>
+        <div class="text-h6 q-mb-xs">{{ $t('inspections.inspectionSubmitted') }}</div>
         <div class="text-body2 text-grey-7 q-mb-lg">
           Your inspection for <strong>{{ kit?.name }}</strong> has been saved.
         </div>
-        <q-btn no-caps rounded unelevated color="primary" label="Back to Dashboard" :to="backRoute" />
+        <q-btn no-caps rounded unelevated color="primary" :label="$t('common.backToDashboard')" :to="backRoute" />
       </q-card>
     </q-dialog>
 
@@ -216,7 +216,9 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, type RouteLocationRaw } from 'vue-router';
 import { useQuasar, date } from 'quasar';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const $q = useQuasar();
 import { kitsApi, inspectionsApi, type Kit } from 'src/services/api';
 import { useNotify } from 'src/composables/useNotify';
@@ -310,7 +312,7 @@ async function submitInspection() {
     });
     successDialog.value = true;
   } catch (e) {
-    notify.error(e, 'Failed to submit inspection');
+    notify.error(e, t('inspections.submitInspection'));
   } finally {
     submitting.value = false;
   }

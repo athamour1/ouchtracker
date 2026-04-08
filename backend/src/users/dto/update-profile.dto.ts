@@ -1,5 +1,6 @@
 import {
   IsEmail,
+  IsIn,
   IsOptional,
   IsString,
   MinLength,
@@ -14,6 +15,10 @@ export class UpdateProfileDto {
   @IsEmail()
   @IsOptional()
   email?: string;
+
+  @IsIn(['en', 'el'])
+  @IsOptional()
+  locale?: string;
 
   /** Required when newPassword is provided. */
   @ValidateIf((o: UpdateProfileDto) => !!o.newPassword)
