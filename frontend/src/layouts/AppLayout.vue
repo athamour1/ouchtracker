@@ -75,6 +75,12 @@
 
       <!-- ── User + Logout — pinned to bottom ──────────────────────────────── -->
       <div :class="['drawer-footer q-pa-md', $q.dark.isActive ? 'bg-grey-9' : 'bg-grey-2']">
+        <q-btn no-caps rounded
+          flat color="primary" icon="manage_accounts" label="Profile Settings"
+          class="full-width q-mb-sm" size="sm" align="left"
+          to="/profile"
+        />
+        <q-separator class="q-mb-sm" />
         <div class="row items-center q-mb-sm q-gutter-sm">
           <q-avatar color="primary" text-color="white" size="36px">
             <q-icon name="account_circle" size="22px" />
@@ -92,11 +98,6 @@
             />
           </div>
         </div>
-        <q-btn no-caps rounded
-          flat color="primary" icon="manage_accounts" label="Profile Settings"
-          class="full-width q-mb-xs" size="sm" align="left"
-          to="/profile"
-        />
         <q-btn no-caps rounded
           unelevated color="primary" icon="logout" label="Sign Out"
           class="full-width" size="sm"
