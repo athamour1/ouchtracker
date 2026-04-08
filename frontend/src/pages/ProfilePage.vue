@@ -6,10 +6,10 @@
       {{ $t('profile.title') }}
     </div>
 
-    <div class="row q-col-gutter-lg">
+    <div class="column q-gutter-lg">
 
       <!-- ── Personal Info ─────────────────────────────────────────────────── -->
-      <div class="col-12 col-md-6">
+      <div>
         <q-card flat bordered class="q-pa-md">
           <div class="text-subtitle1 text-weight-medium q-mb-md row items-center">
             <q-icon name="person" class="q-mr-sm" color="primary" />
@@ -50,7 +50,7 @@
       </div>
 
       <!-- ── Change Password ───────────────────────────────────────────────── -->
-      <div class="col-12 col-md-6">
+      <div>
         <q-card flat bordered class="q-pa-md">
           <div class="text-subtitle1 text-weight-medium q-mb-md row items-center">
             <q-icon name="lock" class="q-mr-sm" color="primary" />
@@ -126,7 +126,7 @@
       </div>
 
       <!-- ── Language ──────────────────────────────────────────────────────── -->
-      <div class="col-12 col-md-6">
+      <div>
         <q-card flat bordered class="q-pa-md">
           <div class="text-subtitle1 text-weight-medium q-mb-md row items-center">
             <q-icon name="translate" class="q-mr-sm" color="primary" />
@@ -136,25 +136,13 @@
           <q-select
             v-model="selectedLocale"
             :options="localeOptions"
+            option-value="value"
+            option-label="label"
             :label="$t('profile.languageLabel')"
             outlined dense emit-value map-options
             @update:model-value="saveLocale"
           >
             <template #prepend><q-icon name="language" /></template>
-            <template #option="scope">
-              <q-item v-bind="scope.itemProps">
-                <q-item-section avatar>
-                  <span style="font-size: 1.4em">{{ scope.opt.flag }}</span>
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label>{{ scope.opt.label }}</q-item-label>
-                </q-item-section>
-              </q-item>
-            </template>
-            <template #selected-item="scope">
-              <span class="q-mr-sm">{{ localeOptions.find(o => o.value === scope.opt)?.flag }}</span>
-              {{ localeOptions.find(o => o.value === scope.opt)?.label }}
-            </template>
           </q-select>
         </q-card>
       </div>
@@ -176,7 +164,7 @@ const { t } = useI18n();
 const authStore = useAuthStore();
 const notify = useNotify();
 
-const localeOptions = LOCALES.map((l) => ({ label: l.label, value: l.value, flag: l.flag }));
+const localeOptions = LOCALES.map((l) => ({ label: `${l.flag}  ${l.label}`, value: l.value }));
 
 // ── Personal info form ─────────────────────────────────────────────────────
 const infoForm = reactive({ fullName: '', email: '' });
