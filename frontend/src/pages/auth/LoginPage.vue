@@ -97,7 +97,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-// @ts-expect-error — quasar types are resolved inside the Docker container; not available locally
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from 'stores/auth.store';
