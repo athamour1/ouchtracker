@@ -34,7 +34,7 @@
           <q-icon name="install_mobile" size="20px" class="q-mr-sm" />
           <div class="col text-body2">Install OuchTracker for quick offline access</div>
           <q-btn no-caps rounded flat dense label="Install" color="white" class="q-mr-xs" @click="handleInstall" />
-          <q-btn no-caps rounded flat dense round icon="close" color="white" @click="showBanner = false" />
+          <q-btn no-caps rounded flat dense round icon="close" color="white" @click="dismissBanner" />
         </div>
       </transition>
     </q-header>
@@ -145,7 +145,12 @@ const router = useRouter();
 const drawerOpen = ref($q.screen.gt.sm);
 
 const { isInstallable, install } = usePwaInstall();
-const showBanner = ref(true);
+const showBanner = ref(localStorage.getItem('pwa-banner-dismissed') !== 'true');
+
+function dismissBanner() {
+  showBanner.value = false;
+  localStorage.setItem('pwa-banner-dismissed', 'true');
+}
 
 async function handleInstall() {
   showBanner.value = false;
