@@ -2,7 +2,7 @@
   <q-layout view="hHh lpR fFf">
 
     <!-- ── Top header ───────────────────────────────────────────────────────── -->
-    <q-header elevated class="bg-primary text-white">
+    <q-header class="bg-primary text-white">
       <q-toolbar>
         <q-btn no-caps rounded flat dense round icon="menu" aria-label="Menu" @click="toggleDrawer" />
         <q-toolbar-title class="row items-center gap-sm">
