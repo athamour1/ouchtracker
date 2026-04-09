@@ -35,7 +35,7 @@ https://athamour1.github.io/ouchtracker/
 - **Dark mode** — full dark-mode support toggled from the header and login page, preference persisted in `localStorage`
 - **Expiry tracking** — items flagged as expired or expiring within 30 days with colour-coded indicators
 - **Responsive UI** — works on desktop and mobile; drawer starts closed on mobile
-- **PWA** — installable on any device, offline-resilient via Workbox `NetworkFirst` caching, auto-updates on new deploy
+- **Offline-first PWA** — fully installable; all pages and API data are pre-cached on first load and refreshed in the background; checkers can complete inspections and file incident reports with no connection, submissions queue locally and auto-sync when back online; admins can browse kits and users in read-only mode offline
 - **Rounded UI** — consistent rounded buttons, inputs, cards, dialogs, banners and notifications throughout
 - **Stay logged in** — optional "stay logged in" toggle on login; issues a long-lived refresh token (bcrypt-hashed, stored in DB), rotated on every use
 - **Skeleton loading** — Quasar skeleton placeholders on all list/table views while data loads
@@ -60,15 +60,20 @@ https://athamour1.github.io/ouchtracker/
 
 ## Progressive Web App
 
-OuchTracker is a fully installable PWA:
+OuchTracker is a fully offline-capable installable PWA:
 
-- **Installable** — browsers show an "Add to Home Screen" / install prompt
-- **Offline resilient** — Workbox `NetworkFirst` strategy caches recent API responses for 5 minutes; static assets are pre-cached at build time
-- **Auto-update** — service worker uses `skipWaiting + clientsClaim`; users are prompted to reload when a new version is available
-- **Theme** — `theme_color: #c62828` (red) applied to browser chrome and mobile status bar
-- **Icons** — medical suitcase icon in all required sizes (128 → 512 px) including maskable for Android adaptive icons
+- **Installable** — "Add to Home Screen" / install prompt shown automatically
+- **Full offline support** — on first authenticated load the app silently pre-warms the Workbox cache for all kits (including item details), users, inspection/incident history, and dashboard data; the pre-warm repeats whenever the device comes back online or the tab becomes visible again
+- **Offline submissions** — checkers can complete inspections and file incident reports with no connection; submissions are queued to `localStorage` (`ouchtracker_sync_queue`) and flushed automatically on reconnect with a success/failure notification
+- **Deep-link navigation offline** — `navigateFallback: /index.html` ensures any route (e.g. `/my-kits/abc/inspect`) loads correctly from the service worker even on a cold start
+- **Caching strategy per endpoint:**
+  - `/api/kits`, `/api/users` → `StaleWhileRevalidate`, 24 h
+  - `/api/alerts` → `NetworkFirst`, 4 s timeout, 5 min
+  - `/api/inspections`, `/api/incidents` → `NetworkFirst`, 4 s timeout, 1 h
+- **Auto-update** — `skipWaiting + clientsClaim`; users are prompted to reload when a new build ships
+- **Theme** — `theme_color: #b14d4d` applied to browser chrome and mobile status bar
 
-The production nginx config serves `sw.js` with `no-store` headers so the browser always checks for updates, while all other static assets get a 1-year immutable cache.
+The production nginx config serves `sw.js` with `no-store` so the browser always fetches the latest service worker, while all other static assets get a 1-year immutable cache.
 
 ---
 
@@ -156,8 +161,9 @@ The app is available on port **80**. Nginx serves the Quasar PWA (built with `qu
 
 The script will:
 1. Prompt for a semver version (e.g. `1.2.0`)
-2. Build and push `backend` and `frontend` Docker images to GHCR (tagged `:vX.Y.Z` and `:latest`)
-3. Create an annotated Git tag and a GitHub release with auto-generated notes
+2. Bump the version in `frontend/package.json` and create a `chore(release): bump version` commit
+3. Build and push `backend` and `frontend` Docker images to GHCR (tagged `:vX.Y.Z` and `:latest`)
+4. Create an annotated Git tag and a GitHub release with auto-generated notes
 
 #### Required `.env.prod` variables
 

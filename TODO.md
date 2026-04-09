@@ -22,7 +22,7 @@
 - [X] rename the app to OuchTracker
 - [X] change the favicon just to a red cross on pwa and on docs
 - [X] add stay loged in togle switch on login and logic localstorage refresh token 
-- [ ] add i18n
+- [X] add i18n
 - [X] move profile settings abobe the user on on drawer
 - [ ] add offline capabilities for installed pwa and sync when online
   - [ ] keep users and kits for admins localy and refresh them when online (when offline just show the users and kits dont let the admin edit it only through a inspection report and an incident reort)

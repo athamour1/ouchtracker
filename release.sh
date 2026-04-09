@@ -110,6 +110,7 @@ ok "Frontend image pushed"
 
 # ─── Create Git tag & GitHub release ────────────────────────────────────────────
 info "Creating Git tag ${TAG}..."
+git add .
 git tag -a "$TAG" -m "Release ${TAG}"
 git push origin "$TAG"
 ok "Tag ${TAG} pushed"
