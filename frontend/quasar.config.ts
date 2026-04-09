@@ -171,14 +171,47 @@ export default defineConfig((/* ctx */) => {
       extendGenerateSWOptions (cfg) {
         cfg.skipWaiting = true;
         cfg.clientsClaim = true;
-        // Cache the API responses for offline resilience
         cfg.runtimeCaching = [
+          // Kits — long-lived so offline inspection/incident forms can load kit data
           {
-            urlPattern: /\/api\//,
+            urlPattern: /\/api\/kits/,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'api-kits',
+              expiration: { maxEntries: 200, maxAgeSeconds: 86_400 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          // Users — long-lived for admin read-only offline view
+          {
+            urlPattern: /\/api\/users/,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'api-users',
+              expiration: { maxEntries: 100, maxAgeSeconds: 86_400 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          // Dashboard alerts — short-lived, degrade gracefully offline
+          {
+            urlPattern: /\/api\/alerts/,
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'api-cache',
-              expiration: { maxEntries: 50, maxAgeSeconds: 300 },
+              cacheName: 'api-alerts',
+              networkTimeoutSeconds: 4,
+              expiration: { maxEntries: 10, maxAgeSeconds: 300 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          // Inspection & incident history lists — 1h cache for offline reference
+          {
+            urlPattern: /\/api\/(inspections|incidents)/,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'api-submissions',
+              networkTimeoutSeconds: 4,
+              expiration: { maxEntries: 100, maxAgeSeconds: 3_600 },
+              cacheableResponse: { statuses: [0, 200] },
             },
           },
         ];
