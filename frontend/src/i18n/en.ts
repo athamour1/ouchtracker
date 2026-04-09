@@ -242,6 +242,16 @@ export default {
     scanInfo: 'Scanned via QR code',
   },
 
+  // ── Offline ──────────────────────────────────────────────────────────────────
+  offline: {
+    banner: 'You are offline — view data is read-only, submissions will sync when back online.',
+    cachedData: 'Showing cached data. Changes are disabled while offline.',
+    noCachedData: 'No cached data available. Please visit this page while online first.',
+    queuedSubmission: 'Saved locally. Will sync automatically when back online.',
+    syncSuccess: '{n} offline submission(s) synced successfully.',
+    syncPartial: '{n} synced, {f} failed and will retry.',
+  },
+
   // ── Errors ───────────────────────────────────────────────────────────────────
   errors: {
     notFound: 'Page not found',

@@ -133,7 +133,13 @@
         <q-icon name="check_circle" color="positive" size="64px" class="q-mb-md" />
         <div class="text-h6 q-mb-xs">{{ $t('incidents.reportSubmitted') }}</div>
         <div class="text-body2 text-grey-7 q-mb-lg">
-          Quantities have been updated for <strong>{{ kit?.name }}</strong>.
+          <template v-if="offlineQueued">
+            <q-icon name="cloud_off" color="warning" class="q-mr-xs" />
+            {{ $t('offline.queuedSubmission') }}
+          </template>
+          <template v-else>
+            Quantities have been updated for <strong>{{ kit?.name }}</strong>.
+          </template>
         </div>
         <q-btn no-caps rounded unelevated color="primary" :label="$t('common.backToDashboard')"
           :to="backRoute" />
@@ -149,10 +155,14 @@ import { useRoute, type RouteLocationRaw } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { kitsApi, incidentsApi, type Kit } from 'src/services/api';
 import { useNotify } from 'src/composables/useNotify';
+import { useOnline } from 'src/composables/useOnline';
+import { useSyncQueue } from 'src/stores/sync-queue.store';
 
 const { t } = useI18n();
 const route = useRoute();
 const notify = useNotify();
+const { isOnline } = useOnline();
+const syncQueue = useSyncQueue();
 const kitId = route.params.id as string;
 const backRoute: RouteLocationRaw = route.query['from'] === 'qr'
   ? { name: 'dashboard' }
@@ -162,6 +172,7 @@ const kit = ref<Kit | null>(null);
 const loading = ref(false);
 const submitting = ref(false);
 const successDialog = ref(false);
+const offlineQueued = ref(false);
 const description = ref('');
 const search = ref('');
 const showResults = ref(false);
@@ -215,16 +226,31 @@ function onSearchBlur() {
 
 async function submit() {
   submitting.value = true;
-  try {
-    await incidentsApi.submit({
-      kitId,
-      ...(description.value && { description: description.value }),
-      items: incidentItems.value.map((i) => ({
-        kitItemId: i.id,
-        quantityUsed: i.quantityUsed,
-        ...(i.notes && { notes: i.notes }),
-      })),
+  const payload = {
+    kitId,
+    ...(description.value && { description: description.value }),
+    items: incidentItems.value.map((i) => ({
+      kitItemId: i.id,
+      quantityUsed: i.quantityUsed,
+      ...(i.notes && { notes: i.notes }),
+    })),
+  };
+
+  if (!isOnline.value) {
+    syncQueue.enqueue({
+      type: 'incident',
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+      ...payload,
     });
+    offlineQueued.value = true;
+    successDialog.value = true;
+    submitting.value = false;
+    return;
+  }
+
+  try {
+    await incidentsApi.submit(payload);
     successDialog.value = true;
   } catch (e) {
     notify.error(e, t('incidents.submitReport'));
@@ -238,7 +264,7 @@ onMounted(async () => {
   try {
     kit.value = (await kitsApi.get(kitId)).data;
   } catch (e) {
-    notify.error(e, 'Failed to load kit');
+    notify.error(e, !isOnline.value ? t('offline.noCachedData') : 'Failed to load kit');
   } finally {
     loading.value = false;
   }
