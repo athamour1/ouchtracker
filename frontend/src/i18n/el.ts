@@ -82,6 +82,18 @@ export default {
     emailInvalid: 'Εισάγετε έγκυρο email',
     passwordRequired: 'Ο κωδικός είναι υποχρεωτικός',
     loginFailed: 'Αποτυχία σύνδεσης. Ελέγξτε τα στοιχεία σας.',
+    orDivider: 'ή',
+    signInWith: 'Σύνδεση με {provider}',
+    ssoSigningIn: 'Γίνεται σύνδεση…',
+    ssoErrors: {
+      provider_error: 'Η ενιαία σύνδεση απέτυχε. Δοκιμάστε ξανά.',
+      invalid_state: 'Η συνεδρία σύνδεσης έληξε. Δοκιμάστε ξανά.',
+      missing_email: 'Ο λογαριασμός SSO δεν έχει διεύθυνση email.',
+      not_registered: 'Δεν υπάρχει λογαριασμός OuchTracker για τον χρήστη SSO. Ζητήστε από έναν διαχειριστή να τον δημιουργήσει.',
+      account_conflict: 'Αυτό το email είναι ήδη συνδεδεμένο με άλλον λογαριασμό SSO.',
+      inactive: 'Ο λογαριασμός σας έχει απενεργοποιηθεί.',
+      exchange_failed: 'Η ενιαία σύνδεση απέτυχε. Δοκιμάστε ξανά.',
+    },
   },
 
   // ── Dashboard ───────────────────────────────────────────────────────────────
@@ -259,6 +271,7 @@ export default {
     emailAddress: 'Διεύθυνση Email',
     saveInfo: 'Αποθήκευση Αλλαγών',
     infoSaved: 'Το προφίλ ενημερώθηκε',
+    passwordManagedBySso: 'Ο κωδικός σας διαχειρίζεται από τον πάροχο ενιαίας σύνδεσης (SSO).',
     changePassword: 'Αλλαγή Κωδικού',
     currentPassword: 'Τρέχων Κωδικός',
     newPassword: 'Νέος Κωδικός',

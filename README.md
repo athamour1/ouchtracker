@@ -40,6 +40,7 @@ https://athamour1.github.io/ouchtracker/
 - **Stay logged in** — optional "stay logged in" toggle on login; issues a long-lived refresh token (bcrypt-hashed, stored in DB), rotated on every use
 - **Skeleton loading** — Quasar skeleton placeholders on all list/table views while data loads
 - **Internationalisation (i18n)** — full English and Greek (Ελληνικά) translations via vue-i18n v9; language selection saved to the user's profile in the database and restored on login
+- **Single sign-on (optional)** — sign in through a self-hosted OIDC provider such as [authentik](https://goauthentik.io/), switched on with `OIDC_ENABLED=true`; roles can be driven by provider groups
 - **Profile settings** — users can update their name, email, password, and display language from a dedicated profile page
 
 ---
@@ -186,6 +187,49 @@ SEED_ADMIN_NAME=System Admin
 IMAGE_TAG=latest
 ```
 
+### Single sign-on with authentik (optional)
+
+OuchTracker can let users sign in through [authentik](https://goauthentik.io/) — or any other OpenID Connect provider (Keycloak, Authelia, Zitadel, …) — so all your self-hosted apps share one login. It's off by default; password login keeps working unless you turn it off.
+
+**1. In authentik**
+
+1. *Applications → Providers → Create → OAuth2/OpenID Provider*
+   - Client type: **Confidential**
+   - Redirect URI (strict): `https://your-domain.com/api/auth/oidc/callback`
+   - Scopes: keep the defaults (`openid`, `email`, `profile` — `profile` includes the user's groups)
+2. *Applications → Applications → Create*, slug e.g. `ouchtracker`, and pick the provider above. Optionally bind a group/policy to control who may use it.
+3. Optional: create a group such as `ouchtracker-admins` for people who should be OuchTracker admins.
+
+**2. In `.env.prod`**
+
+```env
+OIDC_ENABLED=true
+OIDC_ISSUER=https://auth.your-domain.com/application/o/ouchtracker/
+OIDC_CLIENT_ID=<client id from authentik>
+OIDC_CLIENT_SECRET=<client secret from authentik>
+OIDC_PROVIDER_NAME=authentik
+OIDC_ADMIN_GROUP=ouchtracker-admins   # optional
+```
+
+Restart with `docker compose -f docker-compose.prod.yml --env-file .env.prod up -d` and the login page shows a **Sign in with authentik** button.
+
+| Variable | Default | Description |
+|---|---|---|
+| `OIDC_ENABLED` | `false` | Turn SSO on/off |
+| `OIDC_ISSUER` | — | Provider issuer URL (discovery is read from `<issuer>/.well-known/openid-configuration`) |
+| `OIDC_CLIENT_ID` / `OIDC_CLIENT_SECRET` | — | Client credentials from the provider |
+| `OIDC_REDIRECT_URI` | `${APP_URL}/api/auth/oidc/callback` | Must match the redirect URI registered at the provider |
+| `APP_URL` | `CORS_ORIGIN` | Public URL of the app — where users land after signing in |
+| `OIDC_SCOPES` | `openid profile email` | Requested scopes |
+| `OIDC_PROVIDER_NAME` | `SSO` | Text on the login button |
+| `OIDC_ADMIN_GROUP` | *(empty)* | Members of this group are `ADMIN`, everyone else `CHECKER`, synced on every login. Empty = roles are managed on the Users page |
+| `OIDC_AUTO_CREATE_USERS` | `true` | Create an account on first SSO sign-in. `false` = only users an admin already created may sign in |
+| `LOCAL_LOGIN_ENABLED` | `true` | `false` hides the email/password form (SSO only) |
+
+**How accounts are matched:** on first SSO sign-in the user is matched to an existing OuchTracker account by email (so existing users, including the seeded admin, keep their kits and history) and linked to their provider account from then on. Unknown users are created as described above. SSO-only accounts have no password, so the change-password form is hidden for them. Deactivating a user in OuchTracker still blocks their SSO sign-in.
+
+**How it works:** the backend runs the OIDC authorization code flow with PKCE, reads the user from the provider's userinfo endpoint, then issues the usual OuchTracker access/refresh tokens — so the API, role checks and offline PWA behave exactly as with password login. Signing out of OuchTracker doesn't sign you out of authentik.
+
 ---
 
 ## Project Structure
@@ -236,6 +280,10 @@ All routes are prefixed with `/api`.
 | POST | `/auth/login` | Public | Obtain JWT (+ optional refresh token) |
 | POST | `/auth/refresh` | Public | Rotate refresh token, return new JWT |
 | POST | `/auth/logout` | Any | Invalidate refresh token |
+| GET | `/auth/config` | Public | Which sign-in methods are enabled (password / SSO) |
+| GET | `/auth/oidc/login` | Public | Start SSO login (redirects to the provider) |
+| GET | `/auth/oidc/callback` | Public | SSO redirect URI — register this at the provider |
+| POST | `/auth/oidc/exchange` | Public | Swap the one-time SSO ticket for a JWT (+ refresh token) |
 | GET | `/auth/me` | Any | Current user info (including locale) |
 | PATCH | `/users/me` | Any | Update own profile (name, email, password, locale) |
 | GET/POST | `/users` | Admin | List / create users |

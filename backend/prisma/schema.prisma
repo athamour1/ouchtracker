@@ -24,12 +24,13 @@ enum Role {
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
-  password  String   // bcrypt-hashed
+  password  String?  // bcrypt-hashed; null for users who only sign in via SSO (OIDC)
   fullName  String
   role      Role     @default(CHECKER)
   isActive          Boolean  @default(true)
   locale            String   @default("en") // UI language preference: "en" | "el"
   refreshTokenHash  String?  // bcrypt hash of the refresh token; null = no active session
+  oidcSubject       String?  @unique // `sub` claim from the OIDC provider (e.g. authentik); null = not linked
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

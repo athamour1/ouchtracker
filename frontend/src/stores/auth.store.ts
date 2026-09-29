@@ -80,6 +80,22 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  /** Finish an SSO login: swap the one-time ticket from the callback for a session. */
+  async function loginWithSsoTicket(ticket: string): Promise<boolean> {
+    loading.value = true;
+    error.value = null;
+    try {
+      const { data } = await authApi.ssoExchange(ticket);
+      saveSession(data.accessToken, data.user, data.refreshToken);
+      return true;
+    } catch {
+      error.value = 'SSO login failed';
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  }
+
   async function tryRefresh(): Promise<boolean> {
     const refreshToken = localStorage.getItem('refresh_token');
     const userId = localStorage.getItem('refresh_user_id');
@@ -114,8 +130,9 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function setUser(updated: User) {
-    user.value = updated;
-    localStorage.setItem('user', JSON.stringify(updated));
+    // Merge so fields only returned at login (e.g. hasPassword) are kept
+    user.value = { ...user.value, ...updated };
+    localStorage.setItem('user', JSON.stringify(user.value));
   }
 
   // Hydrate immediately when the store is first used
@@ -130,6 +147,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAdmin,
     isChecker,
     login,
+    loginWithSsoTicket,
     logout,
     tryRefresh,
     refreshUser,

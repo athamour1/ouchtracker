@@ -19,6 +19,12 @@ const routes: RouteRecordRaw[] = [
     name: 'login',
     component: () => import('pages/auth/LoginPage.vue'),
   },
+  {
+    // SSO (OIDC) login lands here with a one-time ticket
+    path: '/auth/callback',
+    name: 'sso-callback',
+    component: () => import('pages/auth/SsoCallbackPage.vue'),
+  },
 
   // ── Kit QR landing page (uses AppLayout, requires auth) ──────────────────────
   {

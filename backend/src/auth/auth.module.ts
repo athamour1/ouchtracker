@@ -6,6 +6,8 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { OidcController } from './oidc/oidc.controller';
+import { OidcService } from './oidc/oidc.service';
 
 @Module({
   imports: [
@@ -19,8 +21,8 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       }),
     }),
   ],
-  controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  controllers: [AuthController, OidcController],
+  providers: [AuthService, LocalStrategy, JwtStrategy, OidcService],
   exports: [AuthService],
 })
 export class AuthModule {}

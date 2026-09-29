@@ -82,6 +82,18 @@ export default {
     emailInvalid: 'Enter a valid email',
     passwordRequired: 'Password is required',
     loginFailed: 'Login failed. Please check your credentials.',
+    orDivider: 'or',
+    signInWith: 'Sign in with {provider}',
+    ssoSigningIn: 'Signing you in…',
+    ssoErrors: {
+      provider_error: 'Single sign-on failed. Please try again.',
+      invalid_state: 'Your sign-in session expired. Please try again.',
+      missing_email: 'Your SSO account has no email address.',
+      not_registered: 'No OuchTracker account exists for your SSO user. Ask an admin to create one.',
+      account_conflict: 'This email is already linked to a different SSO account.',
+      inactive: 'Your account has been deactivated.',
+      exchange_failed: 'Single sign-on failed. Please try again.',
+    },
   },
 
   // ── Dashboard ───────────────────────────────────────────────────────────────
@@ -259,6 +271,7 @@ export default {
     emailAddress: 'Email Address',
     saveInfo: 'Save Changes',
     infoSaved: 'Profile updated',
+    passwordManagedBySso: 'Your password is managed by your single sign-on provider.',
     changePassword: 'Change Password',
     currentPassword: 'Current Password',
     newPassword: 'New Password',

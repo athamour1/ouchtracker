@@ -1,11 +1,32 @@
 import { Controller, Post, Get, UseGuards, Request, Body } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { OidcService } from './oidc/oidc.service';
+import { isLocalLoginEnabled } from './oidc/oidc.config';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private oidc: OidcService,
+    private config: ConfigService,
+  ) {}
+
+  /**
+   * GET /api/auth/config — public; tells the login page which sign-in methods to show.
+   */
+  @Get('config')
+  getConfig() {
+    return {
+      localLoginEnabled: isLocalLoginEnabled(this.config),
+      sso: {
+        enabled: this.oidc.enabled,
+        providerName: this.oidc.settings.providerName,
+      },
+    };
+  }
 
   /**
    * POST /api/auth/login

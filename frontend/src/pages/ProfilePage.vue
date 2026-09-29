@@ -58,7 +58,12 @@
             {{ $t('profile.changePassword') }}
           </div>
 
-          <q-form @submit.prevent="savePassword" class="q-gutter-sm">
+          <!-- SSO-only users have no password to change -->
+          <div v-if="authStore.user?.hasPassword === false" class="text-body2 text-grey-7">
+            {{ $t('profile.passwordManagedBySso') }}
+          </div>
+
+          <q-form v-else @submit.prevent="savePassword" class="q-gutter-sm">
             <q-input
               v-model="pwForm.currentPassword"
               :label="$t('profile.currentPassword')"

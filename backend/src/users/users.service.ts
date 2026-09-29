@@ -61,6 +61,9 @@ export class UsersService {
 
     // If changing password, verify current password first
     if (dto.newPassword) {
+      if (!user.password) {
+        throw new UnauthorizedException('Your password is managed by your SSO provider');
+      }
       if (!dto.currentPassword) {
         throw new UnauthorizedException('Current password is required to set a new password');
       }

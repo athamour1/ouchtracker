@@ -16,6 +16,8 @@ export interface User {
   locale: string;
   createdAt: string;
   updatedAt: string;
+  /** False for users who only sign in via SSO. Only present on the logged-in user. */
+  hasPassword?: boolean;
 }
 
 export interface LoginResponse {
@@ -106,9 +108,23 @@ export interface IncidentReport {
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
 
+export interface AuthConfig {
+  localLoginEnabled: boolean;
+  sso: { enabled: boolean; providerName: string };
+}
+
 export const authApi = {
+  config: () => api.get<AuthConfig>('/auth/config'),
   login: (email: string, password: string, stayLoggedIn: boolean) =>
     api.post<LoginResponse>('/auth/login', { email, password, stayLoggedIn }),
+  ssoExchange: (ticket: string) =>
+    api.post<LoginResponse>('/auth/oidc/exchange', { ticket }),
+  /** Full-page URL that starts the SSO login (the backend redirects to the provider). */
+  ssoLoginUrl: (stayLoggedIn: boolean, redirect: string) =>
+    `${api.defaults.baseURL ?? ''}/auth/oidc/login?${new URLSearchParams({
+      stayLoggedIn: String(stayLoggedIn),
+      redirect,
+    }).toString()}`,
   refresh: (userId: string, refreshToken: string) =>
     api.post<LoginResponse>('/auth/refresh', { userId, refreshToken }),
   logout: () => api.post('/auth/logout'),
