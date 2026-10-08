@@ -181,22 +181,29 @@ export default defineConfig((/* ctx */) => {
         cfg.navigateFallbackDenylist = [/^\/api\//];
 
         cfg.runtimeCaching = [
-          // Kits — long-lived so offline inspection/incident forms can load kit data
+          // Kits — NetworkFirst: με δίκτυο πάντα φρέσκα, ώστε μετά από create/edit/
+          // delete kit ή αντικειμένου το refetch να δείχνει ΑΜΕΣΩΣ τη νέα κατάσταση·
+          // offline πέφτει στο cache (οι φόρμες inspection/incident φορτώνουν kit
+          // δεδομένα). Το StaleWhileRevalidate έδειχνε παλιά λίστα μέχρι το επόμενο
+          // reload — «κολλημένα» tables.
           {
             urlPattern: /\/api\/kits/,
-            handler: 'StaleWhileRevalidate',
+            handler: 'NetworkFirst',
             options: {
               cacheName: 'api-kits',
+              networkTimeoutSeconds: 4,
               expiration: { maxEntries: 200, maxAgeSeconds: 86_400 },
               cacheableResponse: { statuses: [0, 200] },
             },
           },
-          // Users — long-lived for admin read-only offline view
+          // Users — NetworkFirst: φρέσκα με δίκτυο (άμεση ενημέρωση μετά από
+          // προσθήκη/επεξεργασία χρήστη), cache fallback offline.
           {
             urlPattern: /\/api\/users/,
-            handler: 'StaleWhileRevalidate',
+            handler: 'NetworkFirst',
             options: {
               cacheName: 'api-users',
+              networkTimeoutSeconds: 4,
               expiration: { maxEntries: 100, maxAgeSeconds: 86_400 },
               cacheableResponse: { statuses: [0, 200] },
             },
