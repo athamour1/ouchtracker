@@ -80,6 +80,29 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  /**
+   * SSO: ανταλλάσσει ένα access token του Authentik με OuchTracker session.
+   * Ζητάμε πάντα `stayLoggedIn=true` ώστε το υπάρχον refresh-token μηχανισμό να
+   * κρατά τη συνεδρία ζωντανή χωρίς να ξαναχτυπάμε το Authentik σε κάθε λήξη.
+   */
+  async function loginWithOidc(authentikToken: string): Promise<boolean> {
+    loading.value = true;
+    error.value = null;
+    try {
+      const { data } = await authApi.oidc(authentikToken, true);
+      saveSession(data.accessToken, data.user, data.refreshToken);
+      return true;
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+        'Η σύνδεση SSO απέτυχε.';
+      error.value = Array.isArray(msg) ? msg[0] : msg;
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  }
+
   async function tryRefresh(): Promise<boolean> {
     const refreshToken = localStorage.getItem('refresh_token');
     const userId = localStorage.getItem('refresh_user_id');
@@ -130,6 +153,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAdmin,
     isChecker,
     login,
+    loginWithOidc,
     logout,
     tryRefresh,
     refreshUser,

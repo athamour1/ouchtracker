@@ -21,6 +21,25 @@
 
       <!-- Login form -->
       <q-card-section class="q-pt-none">
+        <!-- Single sign-on (Σ.Ε.Ο.) — η κύρια είσοδος όταν είναι ρυθμισμένο -->
+        <div v-if="oidcEnabled" class="ot-form-stack q-mb-md">
+          <q-btn
+            no-caps rounded unelevated size="md"
+            color="primary"
+            class="full-width"
+            icon="badge"
+            :label="$t('auth.ssoSignIn')"
+            :loading="ssoBusy"
+            :disable="!isOnline"
+            @click="startSso"
+          />
+          <div class="row items-center text-grey-6 q-mt-xs">
+            <q-separator class="col" />
+            <span class="q-mx-sm text-caption">{{ $t('auth.or') }}</span>
+            <q-separator class="col" />
+          </div>
+        </div>
+
         <q-form @submit="handleLogin" class="login-form ot-form-stack">
           <q-input
             v-model="email"
@@ -116,6 +135,7 @@ import { useI18n } from 'vue-i18n';
 import { useAuthStore } from 'stores/auth.store';
 import { useOnline } from 'src/composables/useOnline';
 import { useFormValidation } from 'src/composables/useFormValidation';
+import { oidcEnabled, login as ssoLogin } from 'src/lib/oidc';
 
 const { t } = useI18n();
 const $q = useQuasar();
@@ -140,6 +160,22 @@ const password = ref('');
 const showPassword = ref(false);
 const stayLoggedIn = ref(false);
 const loginError = ref('');
+const ssoBusy = ref(false);
+
+/** Ξεκινά τη ροή SSO, θυμούμενη πού ήθελε να πάει ο χρήστης. */
+async function startSso() {
+  loginError.value = '';
+  ssoBusy.value = true;
+  try {
+    const raw = route.query.redirect as string | undefined;
+    const redirect = raw?.startsWith('/') && !raw.startsWith('//') ? raw : '/dashboard';
+    await ssoLogin(redirect);
+  } catch {
+    ssoBusy.value = false;
+    loginError.value = t('auth.loginFailed');
+  }
+}
+
 
 async function handleLogin() {
   loginError.value = '';

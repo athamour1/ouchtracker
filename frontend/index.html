@@ -20,6 +20,28 @@
 
     <!-- Runtime config — API URL injected by the container entrypoint -->
     <script src="/config.js"></script>
+    <!--
+      Front-channel Single Logout — runs IMMEDIATELY, before the app boots.
+
+      Authentik loads /auth/frontchannel-logout in a short-lived hidden iframe;
+      the heavy PWA boot (lazy route chunk + mount) does not finish in time. So
+      we clear the local session and raise the cross-tab signal here, inline. Open
+      tabs listen for it (storage event) and log out — see boot/sso-sync.ts.
+    -->
+    <script>
+      (function () {
+        try {
+          if (location.pathname === '/auth/frontchannel-logout') {
+            ['access_token', 'user', 'refresh_token', 'refresh_user_id', 'ouchtracker:sso'].forEach(
+              function (k) { localStorage.removeItem(k); },
+            );
+            localStorage.setItem('ouchtracker:slo', String(Date.now()));
+          }
+        } catch (e) {
+          /* private browsing */
+        }
+      })();
+    </script>
   </head>
   <body>
     <!-- quasar:entry-point -->

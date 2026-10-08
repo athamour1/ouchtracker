@@ -109,6 +109,9 @@ export interface IncidentReport {
 export const authApi = {
   login: (email: string, password: string, stayLoggedIn: boolean) =>
     api.post<LoginResponse>('/auth/login', { email, password, stayLoggedIn }),
+  /** Ανταλλαγή access token του Authentik με OuchTracker session (SSO). */
+  oidc: (token: string, stayLoggedIn: boolean) =>
+    api.post<LoginResponse>('/auth/oidc', { token, stayLoggedIn }),
   refresh: (userId: string, refreshToken: string) =>
     api.post<LoginResponse>('/auth/refresh', { userId, refreshToken }),
   logout: () => api.post('/auth/logout'),

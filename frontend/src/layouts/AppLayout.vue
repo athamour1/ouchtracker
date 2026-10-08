@@ -146,6 +146,7 @@ import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from 'stores/auth.store';
+import { oidcEnabled, ssoLogout } from 'src/lib/oidc';
 import { usePwaInstall } from 'src/composables/usePwaInstall';
 import { useOnline } from 'src/composables/useOnline';
 import { useSyncQueue } from 'src/stores/sync-queue.store';
@@ -222,6 +223,14 @@ if (saved !== null) $q.dark.set(saved === 'true');
 
 async function handleLogout() {
   await authStore.logout();
+  // Single Logout: τερματίζουμε και τη συνεδρία του Authentik, ώστε να βγει ο
+  // χρήστης από ΟΛΕΣ τις εφαρμογές του SSO (ένα account → ένα logout). Σε
+  // κοινόχρηστο υπολογιστή μια «αποσύνδεση» που αφήνει ζωντανό το IdP είναι
+  // ψεύτικη. Το νέο login μετά είναι ένα κλικ και ξαναμπαίνει παντού.
+  if (oidcEnabled) {
+    await ssoLogout();
+    return;
+  }
   await router.push({ name: 'login' });
 }
 </script>

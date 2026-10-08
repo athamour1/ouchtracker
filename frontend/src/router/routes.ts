@@ -20,6 +20,25 @@ const routes: RouteRecordRaw[] = [
     component: () => import('pages/auth/LoginPage.vue'),
   },
 
+  // ── SSO (Authentik) callback & silent-renew — public, no layout ──────────────
+  {
+    path: '/auth/callback',
+    name: 'auth-callback',
+    component: () => import('pages/auth/CallbackPage.vue'),
+  },
+  {
+    path: '/auth/silent',
+    name: 'auth-silent',
+    component: () => import('pages/auth/SilentPage.vue'),
+  },
+  // Front-channel Single Logout — το Authentik τη φορτώνει σε κρυφό iframe.
+  // Public (χωρίς requiresAuth): ο χρήστης αποσυνδέεται, δεν έχει συνεδρία.
+  {
+    path: '/auth/frontchannel-logout',
+    name: 'auth-frontchannel-logout',
+    component: () => import('pages/auth/FrontchannelLogoutPage.vue'),
+  },
+
   // ── Kit QR landing page (uses AppLayout, requires auth) ──────────────────────
   {
     path: '/kit/:id',

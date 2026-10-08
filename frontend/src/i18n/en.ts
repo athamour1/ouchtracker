@@ -82,6 +82,10 @@ export default {
     emailInvalid: 'Enter a valid email',
     passwordRequired: 'Password is required',
     loginFailed: 'Login failed. Please check your credentials.',
+    ssoSignIn: 'Sign in with Σ.Ε.Ο. account',
+    or: 'or',
+    signingIn: 'Signing in…',
+    backToLogin: 'Back to login',
   },
 
   // ── Dashboard ───────────────────────────────────────────────────────────────
