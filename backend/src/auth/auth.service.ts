@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
+import { OidcService } from './oidc.service';
 
 @Injectable()
 export class AuthService {
@@ -11,7 +12,63 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private config: ConfigService,
+    private oidc: OidcService,
   ) {}
+
+  /** Emails that should always be ADMIN in OuchTracker, from OIDC_ADMIN_EMAILS. */
+  private adminEmails(): Set<string> {
+    const raw = this.config.get<string>('OIDC_ADMIN_EMAILS', '');
+    return new Set(
+      raw
+        .split(',')
+        .map((e) => e.trim().toLowerCase())
+        .filter(Boolean),
+    );
+  }
+
+  /**
+   * Single sign-on entry: an Authentik access token is exchanged for an
+   * OuchTracker session. The account is provisioned on first arrival; the
+   * admin-email list acts as a floor (it can promote to ADMIN but never
+   * demotes a manually promoted user). The rest of the app keeps using the
+   * same OuchTracker JWT it always has — only the door is new.
+   */
+  async oidcLogin(token: string, stayLoggedIn: boolean) {
+    const claims = await this.oidc.verify(token);
+    const shouldBeAdmin = this.adminEmails().has(claims.email);
+
+    const existing = await this.prisma.user.findUnique({ where: { email: claims.email } });
+
+    let user;
+    if (existing) {
+      if (!existing.isActive) throw new UnauthorizedException('Ο λογαριασμός είναι ανενεργός.');
+      user = await this.prisma.user.update({
+        where: { id: existing.id },
+        data: {
+          fullName: claims.name ?? existing.fullName,
+          // Προαγωγή σε ADMIN αν είναι στη λίστα· ποτέ υποβιβασμός.
+          role: shouldBeAdmin && existing.role !== 'ADMIN' ? 'ADMIN' : existing.role,
+        },
+      });
+    } else {
+      // Ο λογαριασμός SSO δεν έχει τοπικό κωδικό: βάζουμε τυχαίο hash ώστε η
+      // σύνδεση με email/κωδικό να είναι αδύνατη — η είσοδος γίνεται μόνο μέσω
+      // Authentik.
+      const unusable = await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 10);
+      user = await this.prisma.user.create({
+        data: {
+          email: claims.email,
+          password: unusable,
+          fullName: claims.name ?? claims.email,
+          role: shouldBeAdmin ? 'ADMIN' : 'CHECKER',
+          locale: 'el',
+        },
+      });
+    }
+
+    const { password: _pw, refreshTokenHash: _rt, ...safeUser } = user;
+    return this.login(safeUser, stayLoggedIn);
+  }
 
   async validateUser(email: string, password: string) {
     const user = await this.prisma.user.findUnique({ where: { email } });
